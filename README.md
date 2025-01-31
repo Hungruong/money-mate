@@ -26,7 +26,7 @@ This document provides a detailed guide on how to set up and run the project loc
 
 Before running the project, make sure you have the following software installed:
 
-- **Java 21+** (for backend)
+- **Java 21** (for backend)
 - **Gradle** (for building and running backend services)
 - **Node.js** (for frontend)
 - **Expo Go** (for testing the frontend app)
