@@ -11,7 +11,6 @@ build/
 *.log
 
 # Environment and sensitive configuration files
-*.properties
 *.yml
 *.json
 
