@@ -1,0 +1,27 @@
+# Gradle build directories
+.gradle/
+build/
+
+# IDE configuration files (JetBrains, VS Code, etc.)
+.idea/
+*.iml
+.vscode/
+
+# Log files
+*.log
+
+# Environment and sensitive configuration files
+*.properties
+*.yml
+*.json
+
+# System temporary directories
+.DS_Store
+Thumbs.db
+
+# Directories containing sensitive files like database config (if any)
+.env
+
+# Temporary directories and files from application runs
+out/
+target/
