@@ -52,6 +52,9 @@ cd money-mate
 
 ---
 
+## After cloning:
+    Please refer to the document I attach in our groupchat to copypaste our data to the files in project before next step.
+
 ## Backend Setup
 
 ### Set Up Databases (AWS RDS)
