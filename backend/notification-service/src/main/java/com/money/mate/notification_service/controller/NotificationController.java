@@ -21,8 +21,8 @@ public class NotificationController {
 
     @PostMapping("/send")
     public ResponseEntity<String> sendNotification(@RequestParam UUID userId,
-                                                   @RequestParam String type,
-                                                   @RequestParam String content) {
+            @RequestParam String type,
+            @RequestParam String content) {
         notificationService.sendNotification(userId, type, content);
         return ResponseEntity.ok("Notification sent successfully.");
     }
