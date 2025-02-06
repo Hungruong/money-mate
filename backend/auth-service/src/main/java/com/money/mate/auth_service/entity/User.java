@@ -16,7 +16,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID userId;  
+    private UUID userId;
 
     @Column(nullable = false, unique = true, length = 255)
     private String firebaseUid; // UID from Firebase Authentication
@@ -25,7 +25,7 @@ public class User {
     private String email;
 
     @Column(nullable = false)
-    private String password;  // Only stored if Firebase isn't used for auth
+    private String password; // Only stored if Firebase isn't used for auth
 
     @Column(length = 100)
     private String name;

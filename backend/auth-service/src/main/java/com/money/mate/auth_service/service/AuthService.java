@@ -21,7 +21,7 @@ public class AuthService {
         if (existingUser.isPresent()) {
             return "Email already exists!";
         }
-        
+
         // Check if Firebase UID is already registered
         if (userRepository.findByFirebaseUid(user.getFirebaseUid()).isPresent()) {
             return "Firebase UID already exists!";
