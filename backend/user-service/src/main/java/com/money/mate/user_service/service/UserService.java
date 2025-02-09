@@ -22,7 +22,25 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
+    public void deleteUser(UUID userId) {
+        userRepository.deleteById(userId);
+    }
+
     public User updateUser(User updatedUser) {
         return userRepository.save(updatedUser);
     }
+
+    public User createUser(User user) {
+        System.out.println("About to save user: " + user);
+        try {
+            User savedUser = userRepository.save(user);
+            System.out.println("Successfully saved user: " + savedUser);
+            return savedUser;
+        } catch (Exception e) {
+            System.out.println("Error saving user: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
+    }    
+    
 }

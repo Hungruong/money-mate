@@ -17,7 +17,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID userId;
 
-    @Column(nullable = false, unique = true, length = 255)
+    @Column( nullable =  false, unique = true, length = 255)
     private String firebaseUid;
 
     @Column(nullable = false, unique = true, length = 100)
@@ -35,6 +35,8 @@ public class User {
 
     @Column(nullable = false)
     private double autoTradingBalance = 0.0;
+    @Column(nullable = false)
+    private String password;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false, updatable = false)
