@@ -16,6 +16,14 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
+    
+    @PostMapping
+    public ResponseEntity<User> createUser(@RequestBody User user) {
+        System.out.println("Received request to create user: " + user);
+        User createdUser = userService.createUser(user);
+        System.out.println("Created user: " + createdUser);
+        return ResponseEntity.ok(createdUser);
+    }
 
     @GetMapping("/{userId}")
     public ResponseEntity<User> getUserById(@PathVariable UUID userId) {
@@ -23,6 +31,7 @@ public class UserController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+    
 
     @GetMapping("/email")
     public ResponseEntity<User> getUserByEmail(@RequestParam String email) {
@@ -35,5 +44,11 @@ public class UserController {
     public ResponseEntity<User> updateUser(@PathVariable UUID userId, @RequestBody User updatedUser) {
         updatedUser.setUserId(userId);
         return ResponseEntity.ok(userService.updateUser(updatedUser));
+    }
+
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<Void> deleteUser(@PathVariable UUID userId) {
+    userService.deleteUser(userId);
+    return ResponseEntity.noContent().build();
     }
 }
