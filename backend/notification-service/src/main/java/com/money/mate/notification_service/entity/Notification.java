@@ -12,9 +12,9 @@ import java.util.UUID;
 public class Notification {
     private UUID notificationId;
     private UUID userId;
-    private String type;      // E.g., 'Payment', 'Reminder'
+    private String type; // E.g., 'Payment', 'Reminder'
     private String content;
-    private String status;    // 'Unread' or 'Read'
+    private String status; // 'Unread' or 'Read'
     private Instant createdAt;
     private Instant readAt;
 }

@@ -29,10 +29,10 @@ public class User {
 
     @Column(nullable = false)
     private double income = 0.0;
-    
+
     @Column(nullable = false)
     private double manualTradingBalance = 0.0;
-    
+
     @Column(nullable = false)
     private double autoTradingBalance = 0.0;
 
