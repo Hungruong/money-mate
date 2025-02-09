@@ -31,6 +31,7 @@ yarn-error.*
 
 # local env files
 .env*.local
+backend/auth-service/money-mate-b11e8-firebase-adminsdk-fbsvc-844f025558.json
 
 # typescript
 *.tsbuildinfo
