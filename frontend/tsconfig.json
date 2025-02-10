@@ -8,12 +8,8 @@
       ]
     }
   },
-<<<<<<< HEAD
   "include": [
     "**/*.ts",
     "**/*.tsx"
   ]
-=======
-  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts", "screens/EditProfile.js"]
->>>>>>> 0e38872 (resolve conflict after pulling frontend structure)
 }
