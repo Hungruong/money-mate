@@ -24,3 +24,6 @@ Thumbs.db
 # Temporary directories and files from application runs
 out/
 target/
+
+
+**/src/main/resources/application.properties
