@@ -6,6 +6,7 @@ import ProfileScreen from "../screens/profile/Profile";
 import TradingScreen from "../screens/trading";
 import GroupSavingScreen from "../screens/GroupSaving";
 import BillSplitScreen from "../screens/BillSplit";
+import AppNavigator from "./UserProfileNavigator";
 
 const Tab = createBottomTabNavigator();
 
@@ -32,7 +33,7 @@ export default function BottomTabNavigator() {
       <Tab.Screen name="Trading" component={TradingScreen} />
       <Tab.Screen name="Group Saving" component={GroupSavingScreen} />
       <Tab.Screen name="Bill Split" component={BillSplitScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="Profile" component={AppNavigator} />
     </Tab.Navigator>
   );
 }
