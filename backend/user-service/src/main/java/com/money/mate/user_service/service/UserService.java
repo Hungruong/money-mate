@@ -2,6 +2,9 @@ package com.money.mate.user_service.service;
 
 import com.money.mate.user_service.entity.User;
 import com.money.mate.user_service.repository.UserRepository;
+
+import jakarta.persistence.EntityNotFoundException;
+
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.UUID;
@@ -22,13 +25,22 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
+
+    public Optional<User> getUserByPhoneNumber(String phoneNumber) {
+        return userRepository.findByPhoneNumber(phoneNumber);
+    }
+
     public void deleteUser(UUID userId) {
         userRepository.deleteById(userId);
     }
-
+    // We should check if the user exist or not before calling save() method
     public User updateUser(User updatedUser) {
+        if (!userRepository.existsById(updatedUser.getUserId())) {
+        throw new EntityNotFoundException("User not found");
+        }
         return userRepository.save(updatedUser);
     }
+
 
     public User createUser(User user) {
         System.out.println("About to save user: " + user);
