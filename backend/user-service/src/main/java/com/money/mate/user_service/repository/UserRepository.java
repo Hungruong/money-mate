@@ -10,4 +10,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     Optional<User> findByFirebaseUid(String firebaseUid);
 
+    Optional<User> findByPhoneNumber(String phoneNumber);
+
 }
