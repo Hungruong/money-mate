@@ -23,18 +23,29 @@ public class User {
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 
-    private String name;
+    @Column(length = 100, nullable = false)
+    private String userName; 
+
+    @Column(length = 50)
+    private String firstName; 
+
+    @Column(length = 50)
+    private String lastName; 
+
+    @Column(length = 20)
     private String phoneNumber;
+
+    @Column(columnDefinition = "TEXT")
     private String avatarUrl;
 
     @Column(nullable = false)
-    private double income = 0.0;
+    private double autoTradingBalance = 0.0;
 
     @Column(nullable = false)
     private double manualTradingBalance = 0.0;
 
     @Column(nullable = false)
-    private double autoTradingBalance = 0.0;
+    private double income = 0.0;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false, updatable = false)
