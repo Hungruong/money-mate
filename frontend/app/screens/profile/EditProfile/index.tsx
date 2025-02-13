@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, ImageBackground, Image } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 
 const { width } = Dimensions.get('window');
 
@@ -10,70 +11,98 @@ const EditProfileScreen = ({ navigation }: { navigation: NavigationProp<any> }) 
   const [lastName, setLastName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Edit Profile</Text>
-      
-      <TextInput
-        style={styles.input}
-        placeholder="Username"
-        value={username}
-        onChangeText={setUsername}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="First Name"
-        value={firstName}
-        onChangeText={setFirstName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Last Name"
-        value={lastName}
-        onChangeText={setLastName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Phone Number"
-        keyboardType="phone-pad"
-        value={phoneNumber}
-        onChangeText={setPhoneNumber}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        keyboardType="email-address"
-        value={email}
-        onChangeText={setEmail}
-      />
+    <ImageBackground 
+      source={require('../../../../assets/images/image_background.png')}
+      style={styles.backgroundImage}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Edit Profile</Text>  
+          <View style={styles.avatarContainer}>
+            <Image style={styles.avatar} source={require('../../../../assets/images/profile.webp')} />
+            <TouchableOpacity style={styles.uploadButton}>
+              <Ionicons name="add-circle" size={24} color="#666" />
+            </TouchableOpacity>
+          </View>
+        </View>
 
-      <TouchableOpacity style={styles.saveButton} onPress={() => alert('Profile Updated!')}>
-        <Text style={styles.buttonText}>Save Changes</Text>
-      </TouchableOpacity>
-    </View>
+        <View style={styles.formContainer}>
+          <Text style={styles.label}>Username</Text>
+          <TextInput style={styles.input} value={username} onChangeText={setUsername} />
+
+          <Text style={styles.label}>First Name</Text>
+          <TextInput style={styles.input} value={firstName} onChangeText={setFirstName} />
+
+          <Text style={styles.label}>Last Name</Text>
+          <TextInput style={styles.input} value={lastName} onChangeText={setLastName} />
+
+          <Text style={styles.label}>Email</Text>
+          <TextInput style={styles.input} value={email} onChangeText={setEmail} keyboardType="email-address" />
+
+          <Text style={styles.label}>Password</Text>
+          <TextInput style={styles.input} value={password} onChangeText={setPassword} secureTextEntry />
+        </View>
+
+        <TouchableOpacity style={styles.saveButton} onPress={() => alert('Profile Updated!')}>
+          <Text style={styles.buttonText}>Save Changes</Text>
+        </TouchableOpacity>
+      </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+  },
   container: {
     flex: 1,
+    padding: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    backgroundColor: '#FFC8DD',
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 20,
   },
   title: {
-    fontSize: width * 0.08,
+    fontSize: 25,
     fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
-    color: '#a91337',
+  },
+  avatarContainer: {
+    position: 'relative',
+    alignItems: 'center',
+  },
+  avatar: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 10,
+  },
+  uploadButton: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 2,
+    elevation: 2,
+  },
+  formContainer: {
+    width: '100%',
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 10,
   },
   input: {
     width: '100%',
     backgroundColor: 'white',
-    padding: 12,
+    padding: 10,
     borderRadius: 8,
     marginBottom: 12,
     fontSize: width * 0.04,
@@ -81,11 +110,11 @@ const styles = StyleSheet.create({
     borderColor: '#CDB4DB',
   },
   saveButton: {
-    backgroundColor: '#CDB4DB',
+    backgroundColor: '#FFB347',
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 8,
-    alignItems: 'center',
+    alignSelf: 'center',
     justifyContent: 'center',
     width: '80%',
     marginTop: 20,
@@ -98,6 +127,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default EditProfileScreen;   
-
-
+export default EditProfileScreen;
