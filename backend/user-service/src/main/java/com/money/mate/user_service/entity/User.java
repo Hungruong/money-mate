@@ -21,9 +21,11 @@ public class User {
     private String firebaseUid;
 
     @Column(nullable = false, unique = true, length = 100)
-    private String email;
 
-    private String name;
+    private String email;
+    private String userName;
+    private String firstName;
+    private String lastName;
     private String phoneNumber;
     private String avatarUrl;
 
@@ -37,6 +39,9 @@ public class User {
     private double autoTradingBalance = 0.0;
     @Column(nullable = false)
     private String password;
+
+    @Column(nullable = false)
+    private double totalExpense = 0.0;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false, updatable = false)

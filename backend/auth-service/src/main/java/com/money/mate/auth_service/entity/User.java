@@ -28,7 +28,13 @@ public class User {
     private String password; // Only stored if Firebase isn't used for auth
 
     @Column(length = 100)
-    private String name;
+    private String userName;
+
+    @Column(length = 100)
+    private String firstName;
+
+    @Columm(length = 100)
+    private String lastName;
 
     @Column(length = 20)
     private String phoneNumber;

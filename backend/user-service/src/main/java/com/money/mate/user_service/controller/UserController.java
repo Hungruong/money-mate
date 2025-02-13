@@ -4,8 +4,6 @@ import com.money.mate.user_service.entity.User;
 import com.money.mate.user_service.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -20,7 +18,7 @@ public class UserController {
     @PostMapping
     public ResponseEntity<User> createUser(@RequestBody User user) {
         System.out.println("Received request to create user: " + user);
-        User createdUser = userService.createUser(user);
+        User createdUser = userService.createUser(user); // save the user to the database
         System.out.println("Created user: " + createdUser);
         return ResponseEntity.ok(createdUser);
     }
@@ -36,6 +34,13 @@ public class UserController {
     @GetMapping("/email")
     public ResponseEntity<User> getUserByEmail(@RequestParam String email) {
         return userService.getUserByEmail(email)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/phone")
+    public ResponseEntity<User> getUserByPhoneNumber(@RequestParam String phoneNumber) { 
+        return userService.getUserByPhoneNumber(phoneNumber)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
