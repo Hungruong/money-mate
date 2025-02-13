@@ -25,7 +25,7 @@ const EditProfileScreen = ({ navigation }: { navigation: NavigationProp<any> }) 
           <TouchableOpacity style={styles.uploadButton}>
               <Ionicons name="add-circle" size={24} color="#666" />
           </TouchableOpacity>
-      </View>
+        </View>
 
         <TextInput
           style={styles.input}
@@ -83,11 +83,7 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    //justifyContent: 'center',
-    //alignItems: 'center',
-    paddingHorizontal: 20,
-    //backgroundColor: '#cdb4db',
-    
+    backgroundColor: 'transparent',
   },
   title: {
     fontSize: width * 0.08,
