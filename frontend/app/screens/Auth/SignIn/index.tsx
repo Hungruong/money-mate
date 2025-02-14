@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-import React, { useCallback, useState } from "react";
+import React, { useCallback } from "react";
 import { 
   View, 
   Text, 
@@ -12,233 +11,135 @@ import {
   StatusBar, 
   TouchableOpacity 
 } from "react-native";
-
 import { useNavigation } from "@react-navigation/native";
 import { AuthNavigationProp } from "../../../types/navigation";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from '../../../../FirebaseConfig';
-import { SafeAreaView } from 'react-native'
 
-
-
-
-export default function SignInScreen() {
-=======
-
-import { View, Text, Button } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { AuthNavigationProp } from "../../../types/navigation";
-import { Image, StyleSheet, Platform } from 'react-native';
-
-
-import { TextInput } from 'react-native';
-
-import React, {useCallback} from 'react';
-import {Alert, Linking} from 'react-native';
-import {ImageBackground} from 'react-native';
-import {SafeAreaView, SafeAreaProvider} from 'react-native-safe-area-context';
-import { StatusBar } from 'react-native';
-
-// Importing the class from the location of the file
-
-
-
-// Creating an object of the class which is imported
-
-import { TouchableOpacity } from 'react-native';
 
 export default function SignInScreen({ setIsAuthenticated }: { setIsAuthenticated: (value: boolean) => void }) {
->>>>>>> parent of 4880b4e2 (Update FE Authorization Draft3)
   const navigation = useNavigation<AuthNavigationProp>();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
-
-  const signIn = async () => {
-    try {
-      const user = await signInWithEmailAndPassword(auth, email, password)
-      //if (user) router.replace('/(tabs)');
-      console.log("SIGN IN SUCESS")
-    } catch (error: any) {
-      console.log(error)
-      alert('Sign in failed: ' + error.message);
-    }
-  }
-
-  const signUp = async () => {
-    try {
-      const user = await createUserWithEmailAndPassword(auth, email, password)
-      //if (user) router.replace('/(tabs)');
-      console.log("SIGN UP SUCESS")
-    } catch (error: any) {
-      console.log(error)
-      alert('Sign in failed: ' + error.message);
-    }
-  }
-
 
   return (
-
     <View style={styles.root}>
-    <StatusBar backgroundColor="black" barStyle="dark-content" />
+      <StatusBar backgroundColor="black" barStyle="dark-content" />
 
-    <ImageBackground style={styles.background} source={require('@/assets/images/background5.png')}>
+      <ImageBackground style={styles.background} source={require('@/assets/images/background5.png')}>
+        <Text style={styles.title}>Sign In</Text>
+        <Text style={styles.subtitle}>Hi! Welcome back</Text>
 
-<<<<<<< HEAD
         {/* Email Input */}
         <Text style={styles.textLabel}>Email</Text>
-        <TextInput style={styles.inputTextbox} placeholder="  Please enter your email" value={email} onChangeText={setEmail}/>
+        <TextInput style={styles.inputTextbox} placeholder="  Please enter your email" />
 
         {/* Password Input */}
         <Text style={styles.textLabel}>Password</Text>
-        <TextInput style={styles.inputTextbox} placeholder="  Please enter your password" secureTextEntry value={password} onChangeText={setPassword} />
-=======
+        <TextInput style={styles.inputTextbox} placeholder="  Please enter your password" secureTextEntry />
 
-      <Text style={styles.title}>Sign In</Text>
-      <Text style={styles.subtitle}>Hi! Welcome back </Text>
-    
-      
-      
-      <Text style={styles.text1}>Email</Text>
-      <TextInput style={styles.inputTextbox} placeholder='  Please enter your email'></TextInput>
-      <Text style={styles.text1}>Password</Text>
-      <TextInput style={styles.inputTextbox} placeholder='  Please enter your password'></TextInput>
-      <Text style={styles.forgotPasswordText} onPress={() => Linking.openURL('THIS INCLUDE LINK')}> Forgot Password </Text>
->>>>>>> parent of 4880b4e2 (Update FE Authorization Draft3)
+        {/* Forgot Password */}
+        <Text style={styles.forgotPasswordText} onPress={() => Linking.openURL('YOUR_FORGOT_PASSWORD_LINK')}>
+          Forgot Password?
+        </Text>
 
-      
-
-
-      <View style={styles.button}>
-        <TouchableOpacity 
-          onPress={() => console.log("Handle Sign Up")} 
-          style={styles.buttonContent}>
+        {/* Sign In Button */}
+        <TouchableOpacity style={styles.button} onPress={() => setIsAuthenticated(true)}>
           <Text style={styles.buttonText}>SIGN IN</Text>
         </TouchableOpacity>
-      </View>
 
-      <Text style={styles.text}>Or sign in with</Text>
-      <Image style={styles.logo}
-          source={require('@/assets/images/google_logo.jpg')}/>
+        {/* Alternative Sign In */}
+        <Text style={styles.text}>Or sign in with</Text>
+        <TouchableOpacity onPress={() => console.log("Handle Google Sign In")}>
+          <Image source={require("@/assets/images/google_logo.jpg")} style={styles.logo} />
+        </TouchableOpacity>
 
-
-      <View style={styles.container2}>
-        <Text style={styles.button2}>Don't have an account ?</Text>
-        
-        <Button title="Sign Up" onPress={() => navigation.navigate("SignUp")} color="#91337b" />
-      </View>
-    
-    </ImageBackground>
-  </View>
+        {/* Sign Up Section */}
+        <View style={styles.signUpContainer}>
+          <Text style={styles.signUpText}>Don't have an account?</Text>
+          <Button title="Sign Up" onPress={() => navigation.navigate("SignUp")} color="#91337b" />
+        </View>
+      </ImageBackground>
+    </View>
   );
 }
 
-
-const styles=StyleSheet.create({
+// Styles
+const styles = StyleSheet.create({
   root: {
-    flex:1, 
-    fontFamily:'GeneralSans-Regular',
-    alignContent:'center',
-},
-  container:{
-    flex:2,textAlign:'center',backgroundColor: 'white',
-  },
-  image:{opacity:2},
-  text:{
-    textAlign:'center',fontSize:20
-  },
-
-
-  header:{
-    flex:1,
-    
-
-  },
-  inputTextbox:{
-    height: 40,
-    width:370,
-    margin:10,
-    borderWidth:1,
-    color: 'grey',
-    borderRadius:10,
-
-  },
-
-  button: {
-    marginTop:30,
-    backgroundColor: '#91337b',
-    padding: 10,
-    borderRadius: 10,
-    width:370,
-    alignSelf:'center',
-    marginBottom:20,
-  },
-  
-  buttonContent: {
-    color: '#91337b',
-    fontSize: 16,
-    alignSelf:'center'
-  },
-  underlinedText:{
-    textDecorationLine:'underline',
+    flex: 1, 
+    alignContent: "center",
   },
   background: {
-    flex:1,
-    justifyContent: 'center', // Centers content vertically
-    // Centers content horizontally
-    width: '100%',
-    height: '100%',
+    flex: 1,
+    justifyContent: "center",
+    width: "100%",
+    height: "100%",
   },
-  title:{
-    textAlign:'center', 
-    fontSize: 30
+  title: {
+    textAlign: "center", 
+    fontSize: 30,
+    fontWeight: "bold",
   },
-  subtitle:{
-    marginTop:10,
-    textAlign:'center', 
+  subtitle: {
+    marginTop: 10,
+    textAlign: "center", 
     fontSize: 20, 
-    color:'grey',
-    marginBottom:30
+    color: "grey",
+    marginBottom: 30,
   },
-  text1:{
-    marginTop:20,
-    fontSize:20,
-    left:10
-  },
-  forgotPasswordText:{
-    color: '#91337b', 
-    textAlign:'right',
-    marginTop:10,
-    right:10,
-    fontSize:15,
-    textDecorationLine:'underline'
-  },
-  buttonCover:{
-    alignItems: 'center', 
+  textLabel: {
     marginTop: 20,
-    
+    fontSize: 20,
+    left: 10,
   },
-  signInButton:{
-    backgroundColor: '#219ebc', 
-    paddingVertical: 10, 
-    paddingHorizontal: 20, 
+  inputTextbox: {
+    height: 40,
+    width: 370,
+    margin: 10,
+    borderWidth: 1,
+    color: "grey",
+    borderRadius: 10,
+    paddingLeft: 10,
+  },
+  forgotPasswordText: {
+    color: "#91337b", 
+    textAlign: "right",
+    marginTop: 10,
+    right: 10,
+    fontSize: 15,
+    textDecorationLine: "underline",
+  },
+  button: {
+    marginTop: 30,
+    backgroundColor: "#91337b",
+    padding: 15,
+    borderRadius: 10,
+    width: 370,
+    alignSelf: "center",
+    alignItems: "center",
+  },
+  buttonText: { 
+    color: "white", 
+    fontSize: 16, 
+    fontWeight: "bold",
+  },
+  text: {
+    textAlign: "center",
+    fontSize: 18,
+    marginVertical: 15,
+  },
+  logo: {
+    width: 50,
+    height: 50,
     borderRadius: 25,
+    alignSelf: "center",
   },
-  buttonContent1:{
-    color: 'white', fontSize: 20, fontWeight: 'bold'
+  signUpContainer: {
+    flexDirection: "row", 
+    alignItems: "center", 
+    alignSelf: "center", 
+    marginTop: 30,
   },
-  logo:{
-    width:50,
-    height:50,
-    borderRadius:1000,
-    alignSelf:'center',
-    marginTop:15,
+  signUpText: {
+    fontSize: 18,
+    marginRight: 10,
   },
-  container2:{ flexDirection: 'row', alignItems: 'center', alignSelf:'center', marginTop: 30 },
-  button2:{fontSize:20},
+});
 
-
-  buttonText:{ color: 'white', fontSize: 16, fontWeight: 'bold' },
-
- 
-})
