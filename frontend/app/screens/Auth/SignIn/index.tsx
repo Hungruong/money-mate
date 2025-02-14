@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { 
   View, 
   Text, 
@@ -11,12 +11,44 @@ import {
   StatusBar, 
   TouchableOpacity 
 } from "react-native";
+
 import { useNavigation } from "@react-navigation/native";
 import { AuthNavigationProp } from "../../../types/navigation";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from '../../../../FirebaseConfig';
+import { SafeAreaView } from 'react-native'
 
 
-export default function SignInScreen({ setIsAuthenticated }: { setIsAuthenticated: (value: boolean) => void }) {
+
+
+export default function SignInScreen() {
   const navigation = useNavigation<AuthNavigationProp>();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+
+  const signIn = async () => {
+    try {
+      const user = await signInWithEmailAndPassword(auth, email, password)
+      //if (user) router.replace('/(tabs)');
+      console.log("SIGN IN SUCESS")
+    } catch (error: any) {
+      console.log(error)
+      alert('Sign in failed: ' + error.message);
+    }
+  }
+
+  const signUp = async () => {
+    try {
+      const user = await createUserWithEmailAndPassword(auth, email, password)
+      //if (user) router.replace('/(tabs)');
+      console.log("SIGN UP SUCESS")
+    } catch (error: any) {
+      console.log(error)
+      alert('Sign in failed: ' + error.message);
+    }
+  }
+
 
   return (
     <View style={styles.root}>
@@ -28,11 +60,11 @@ export default function SignInScreen({ setIsAuthenticated }: { setIsAuthenticate
 
         {/* Email Input */}
         <Text style={styles.textLabel}>Email</Text>
-        <TextInput style={styles.inputTextbox} placeholder="  Please enter your email" />
+        <TextInput style={styles.inputTextbox} placeholder="  Please enter your email" value={email} onChangeText={setEmail}/>
 
         {/* Password Input */}
         <Text style={styles.textLabel}>Password</Text>
-        <TextInput style={styles.inputTextbox} placeholder="  Please enter your password" secureTextEntry />
+        <TextInput style={styles.inputTextbox} placeholder="  Please enter your password" secureTextEntry value={password} onChangeText={setPassword} />
 
         {/* Forgot Password */}
         <Text style={styles.forgotPasswordText} onPress={() => Linking.openURL('YOUR_FORGOT_PASSWORD_LINK')}>
