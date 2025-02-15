@@ -19,21 +19,21 @@ public class User {
     private UUID userId;
 
     @Column(nullable = false, unique = true, length = 255)
-    private String firebaseUid; // UID from Firebase Authentication
+    private String firebaseUid; 
 
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 
     @Column(nullable = false)
-    private String password; // Only stored if Firebase isn't used for auth
+    private String password; 
 
-    @Column(length = 100)
-    private String userName;
+    @Column(length = 100, nullable = false)
+    private String userName; 
 
-    @Column(length = 100)
-    private String firstName;
+    @Column(length = 50)
+    private String firstName; 
 
-    @Columm(length = 100)
+    @Column(length = 50)
     private String lastName;
 
     @Column(length = 20)
@@ -42,14 +42,14 @@ public class User {
     @Column(columnDefinition = "TEXT")
     private String avatarUrl;
 
-    @Column(nullable = false, columnDefinition = "DECIMAL(12,2) DEFAULT 0.0")
-    private double income = 0.0;
+    @Column(nullable = false)
+    private double autoTradingBalance = 0.0;
 
-    @Column(nullable = false, columnDefinition = "DECIMAL(12,2) DEFAULT 0.0")
+    @Column(nullable = false)
     private double manualTradingBalance = 0.0;
 
-    @Column(nullable = false, columnDefinition = "DECIMAL(12,2) DEFAULT 0.0")
-    private double autoTradingBalance = 0.0;
+    @Column(nullable = false)
+    private double income = 0.0;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false, updatable = false)
@@ -58,8 +58,15 @@ public class User {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt = new Date();
 
+    @PrePersist
     @PreUpdate
-    protected void onUpdate() {
+    protected void validateAuthFields() {
+        if ((firebaseUid == null || firebaseUid.isBlank()) && (password == null || password.isBlank())) {
+            throw new IllegalArgumentException("Either firebaseUid or password must be provided.");
+        }
+        if (firebaseUid != null && !firebaseUid.isBlank() && password != null && !password.isBlank()) {
+            throw new IllegalArgumentException("Only one of firebaseUid or password should be provided.");
+        }
         updatedAt = new Date();
     }
 }
