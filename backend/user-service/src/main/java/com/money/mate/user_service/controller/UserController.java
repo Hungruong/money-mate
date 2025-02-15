@@ -5,7 +5,9 @@ import com.money.mate.user_service.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
+import java.util.Optional;
 
+@CrossOrigin(origins = "*") // Allow all origins (for testing purposes)
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -29,14 +31,17 @@ public class UserController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-    
 
     @GetMapping("/email")
     public ResponseEntity<User> getUserByEmail(@RequestParam String email) {
+        if (email == null || email.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(null);
+        }
         return userService.getUserByEmail(email)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
     }
+
 
     @GetMapping("/phone")
     public ResponseEntity<User> getUserByPhoneNumber(@RequestParam String phoneNumber) { 
@@ -48,7 +53,7 @@ public class UserController {
     @PutMapping("/{userId}")
     public ResponseEntity<User> updateUser(@PathVariable UUID userId, @RequestBody User updatedUser) {
         updatedUser.setUserId(userId);
-        return ResponseEntity.ok(userService.updateUser(updatedUser));
+        return ResponseEntity.ok(userService.updateUser(userId, updatedUser));
     }
 
     @DeleteMapping("/{userId}")
