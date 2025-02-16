@@ -63,6 +63,9 @@ public class UserService {
             String hashedPassword = passwordEncoder.encode(updatedUser.getPassword());
             existingUser.setPassword(hashedPassword); // Update password if provided
         }
+        if (updatedUser.getAvatarUrl() != null) {
+            existingUser.setAvatarUrl(updatedUser.getAvatarUrl());
+        }
         System.out.println("Updated user: " + existingUser);
         // Save the updated user object
         return userRepository.save(existingUser);
