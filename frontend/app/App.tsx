@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
+import {createAppContainer} from 'react-navigation'; 
 import { createStackNavigator } from "@react-navigation/stack";
 import AuthNavigator from "./navigation/AuthNavigator";
 import BottomTabNavigator from "./navigation/BottomTabNavigator";
