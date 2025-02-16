@@ -21,10 +21,10 @@ import auth from '@react-native-firebase/auth';
 
 export default function SignInScreen({ setIsAuthenticated }: { setIsAuthenticated: (value: boolean) => void }) {
   const navigation = useNavigation<AuthNavigationProp>();
-  GoogleSignin.configure({
-    webClientId: '862178463544-f75l6o1jr0es3iu54ogdakev2qtopv40.apps.googleusercontent.com',
-  });
-  const signInWithGoogle =async()=>{
+  //GoogleSignin.configure({
+    //webClientId: '862178463544-f75l6o1jr0es3iu54ogdakev2qtopv40.apps.googleusercontent.com',
+  //});
+  /*const signInWithGoogle =async()=>{
     try{
     const userInfo = await GoogleSignin.signIn()
     const getToken = await GoogleSignin.getTokens()
@@ -38,7 +38,7 @@ export default function SignInScreen({ setIsAuthenticated }: { setIsAuthenticate
       console.log('error')
     }
 
-  }
+  }*/
 
   return (
     <View style={styles.root}>
@@ -50,9 +50,9 @@ export default function SignInScreen({ setIsAuthenticated }: { setIsAuthenticate
         {/*Button*/}
         <Button
           title="Google Sign-In"
-          onPress={signInWithGoogle =>console.log("Success")}
+          //onPress={signInWithGoogle =>console.log("Success")}
         />        
-        <TouchableOpacity onPress={() => console.warn("Handle Google Sign In")}>
+        <TouchableOpacity onPress={() => {console.log("Handle Google Sign In")}}>
           <Image source={require("@/assets/images/google_logo.jpg")} style={styles.logo} />
         </TouchableOpacity>
 

@@ -1163,7 +1163,7 @@ PODS:
     - ExpoModulesCore
   - Expo (52.0.35):
     - ExpoModulesCore
-  - ExpoAdapterGoogleSignIn (13.1.0):
+  - ExpoAdapterGoogleSignIn (13.2.0):
     - ExpoModulesCore
     - GoogleSignIn (~> 7.1)
     - React-Core
@@ -2897,7 +2897,7 @@ PODS:
     - Firebase/Firestore (= 11.8.0)
     - React-Core
     - RNFBApp
-  - RNGestureHandler (2.23.1):
+  - RNGestureHandler (2.23.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2918,7 +2918,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNGoogleSignin (13.1.0):
+  - RNGoogleSignin (13.2.0):
     - GoogleSignIn (~> 7.1)
     - React-Core
   - RNReanimated (3.16.7):
@@ -3317,7 +3317,7 @@ SPEC CHECKSUMS:
   DoubleConversion: f16ae600a246532c4020132d54af21d0ddb2a385
   EXConstants: f5c27bfa40ba650257535ab958f4f5876ee93edd
   Expo: 24e21e782c2858eae363d3597ea945751e5af078
-  ExpoAdapterGoogleSignIn: 6393c1ad521f880f6e467bca40baf1e5dcaea4a3
+  ExpoAdapterGoogleSignIn: f5ca2b67502442629d99dbe202b6ae821d77c75d
   ExpoAsset: 715ce37a36951fee71c32773b3be50f2285e2fbe
   ExpoFileSystem: 5df53001901f76b493bd5deb75ac506871cc9b2e
   ExpoFont: 38656978c2a4022fb7e0c43e4968d66340f5e2f3
@@ -3408,8 +3408,8 @@ SPEC CHECKSUMS:
   RNFBApp: c0e35c80b0da1c93767dcb0060491735518dbebb
   RNFBAuth: 43c7e51ed74e7c71caae2c296819d00a4cae78eb
   RNFBFirestore: 5a4b835d053005914f33388bfe7a00f5a4036110
-  RNGestureHandler: 8cc03951ea42288cb193ba18a93e14157207f8a7
-  RNGoogleSignin: ba93c1137f8d5cebdd39b04f493fd212ddf5ecd6
+  RNGestureHandler: 656eee68004be4ec26e3eaab1c1b5b641bea1fb0
+  RNGoogleSignin: b8760528f2a7cbe157ecfdcc13bdb7d2745c9389
   RNReanimated: 80f5a5dc0ff2cc7b2681ab01a7059bf5de479caa
   RNScreens: ede3944a7dc2e9e548010c23c18b70b1c84e41a4
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
