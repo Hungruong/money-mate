@@ -3,15 +3,5 @@
     "[java]": {
         "editor.defaultFormatter": "redhat.java"
     },
-    "[javascript]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "[javascriptreact]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "[typescriptreact]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "java.format.settings.url": "eclipse-formatter.xml",
-    "java.configuration.updateBuildConfiguration": "interactive"
+    "java.format.settings.url": "eclipse-formatter.xml"
 }
