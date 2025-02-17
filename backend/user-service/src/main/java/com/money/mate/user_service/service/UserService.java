@@ -3,6 +3,7 @@ package com.money.mate.user_service.service;
 import com.money.mate.user_service.entity.User;
 import com.money.mate.user_service.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import com.money.mate.user_service.dto.ChangePasswordRequest;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -33,6 +34,24 @@ public class UserService {
 
     public void deleteUser(UUID userId) {
         userRepository.deleteById(userId);
+    }
+
+    public User changePassword(UUID userId, ChangePasswordRequest request) {
+        // Retrieve the user by ID
+        User existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        // Validate the current password
+        if (!passwordEncoder.matches(request.getCurrentPassword(), existingUser.getPassword())) {
+            throw new IllegalArgumentException("Current password is incorrect");
+        }
+
+        // Hash and update the new password
+        String hashedNewPassword = passwordEncoder.encode(request.getNewPassword());
+        existingUser.setPassword(hashedNewPassword);
+
+        // Save the updated user
+        return userRepository.save(existingUser);
     }
 
     public User updateUser(UUID userId, User updatedUser) {
