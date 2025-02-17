@@ -17,31 +17,35 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID userId;
 
-    @Column( nullable =  false, unique = true, length = 255)
+    @Column(nullable = false, unique = true, length = 255)
     private String firebaseUid;
 
     @Column(nullable = false, unique = true, length = 100)
-
     private String email;
-    private String userName;
-    private String firstName;
-    private String lastName;
+
+    @Column(length = 100, nullable = false)
+    private String userName; 
+
+    @Column(length = 50)
+    private String firstName; 
+
+    @Column(length = 50)
+    private String lastName; 
+
+    @Column(length = 20)
     private String phoneNumber;
+
+    @Column(columnDefinition = "TEXT")
     private String avatarUrl;
 
     @Column(nullable = false)
-    private double income = 0.0;
+    private double autoTradingBalance = 0.0;
 
     @Column(nullable = false)
     private double manualTradingBalance = 0.0;
 
     @Column(nullable = false)
-    private double autoTradingBalance = 0.0;
-    @Column(nullable = false)
-    private String password;
-
-    @Column(nullable = false)
-    private double totalExpense = 0.0;
+    private double income = 0.0;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false, updatable = false)
@@ -53,5 +57,15 @@ public class User {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = new Date();
+    }
+
+    public void setPassword(String hashedNewPassword) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setPassword'");
+    }
+
+    public String getPassword() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getPassword'");
     }
 }
