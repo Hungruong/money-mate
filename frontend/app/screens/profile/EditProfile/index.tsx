@@ -78,12 +78,6 @@ const EditProfileScreen = ({
       email,
     };
 
-    // Only include password if the user has entered a new one
-    if (password.trim() !== "") {
-      updatedData.password = password;
-      console.log("Including new password:", password); 
-    }
-
     // Detect changes
     const changes = Object.fromEntries(
       Object.entries(updatedData).filter(
@@ -181,17 +175,6 @@ const EditProfileScreen = ({
               setEmail(text);
             }}
             keyboardType="email-address"
-          />
-
-          <Text style={styles.label}>Password (Leave blank if unchanged)</Text>
-          <TextInput
-            style={styles.input}
-            value={password}
-            onChangeText={(text) => {
-              console.log("Password changed to:", text); 
-              setPassword(text);
-            }}
-            secureTextEntry
           />
         </View>
 

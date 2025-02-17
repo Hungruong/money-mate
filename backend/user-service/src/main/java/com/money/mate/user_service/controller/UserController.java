@@ -1,5 +1,6 @@
 package com.money.mate.user_service.controller;
 
+import com.money.mate.user_service.dto.ChangePasswordRequest;
 import com.money.mate.user_service.entity.User;
 import com.money.mate.user_service.service.UserService;
 import org.springframework.http.ResponseEntity;
@@ -54,6 +55,21 @@ public class UserController {
     public ResponseEntity<User> updateUser(@PathVariable UUID userId, @RequestBody User updatedUser) {
         updatedUser.setUserId(userId);
         return ResponseEntity.ok(userService.updateUser(userId, updatedUser));
+    }
+    // New endpoint for changing password
+    @PutMapping("/change-password")
+    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest request) {
+        try {
+            // Call the service to change the password
+            userService.changePassword(null, request);
+            return ResponseEntity.ok("Password updated successfully");
+        } catch (IllegalArgumentException e) {
+            // If the current password is incorrect
+            return ResponseEntity.badRequest().body("Current password is incorrect");
+        } catch (Exception e) {
+            // If any other error occurs
+            return ResponseEntity.status(500).body("An error occurred while updating the password");
+        }
     }
 
     @DeleteMapping("/{userId}")

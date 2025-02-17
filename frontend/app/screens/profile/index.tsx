@@ -27,6 +27,7 @@ type RootStackParamList = {
   Billsplit: undefined;
   GroupSaving: undefined;
   HomeScreen: undefined;
+  ChangePassword: undefined;
   
  };
 
@@ -82,6 +83,21 @@ type RootStackParamList = {
         onPress={() => navigation.navigate('EditProfile')}
       >
        <Text style={{ color: 'black', fontWeight: '500' }}>Edit Profile</Text> 
+      </TouchableOpacity>
+      </View>
+      <View style={styles.editButtonContainer}>
+      <TouchableOpacity 
+        style={styles.editButton}
+        onPress={() => navigation.navigate('EditProfile')}
+      >
+       <Text style={{ color: 'black', fontWeight: '500' }}>Edit Profile</Text> 
+      </TouchableOpacity>
+      
+      <TouchableOpacity 
+        style={styles.editButton}
+        onPress={() => navigation.navigate('ChangePassword')} // Added Change Password button
+      >
+       <Text style={{ color: 'black', fontWeight: '500', marginTop: 10 }}>Change Password</Text> 
       </TouchableOpacity>
       </View>
 

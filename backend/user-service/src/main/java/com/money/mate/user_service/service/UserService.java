@@ -77,11 +77,6 @@ public class UserService {
         if (updatedUser.getEmail() != null) {
             existingUser.setEmail(updatedUser.getEmail());
         }
-        if (updatedUser.getPassword() != null) {
-            // Hash the password before saving it
-            String hashedPassword = passwordEncoder.encode(updatedUser.getPassword());
-            existingUser.setPassword(hashedPassword); // Update password if provided
-        }
         if (updatedUser.getAvatarUrl() != null) {
             existingUser.setAvatarUrl(updatedUser.getAvatarUrl());
         }
