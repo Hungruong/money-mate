@@ -17,7 +17,6 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // Define and return the BCryptPasswordEncoder bean
         return new BCryptPasswordEncoder();
     }
 
@@ -26,17 +25,18 @@ public class SecurityConfig {
         http
             .cors(cors -> cors.configurationSource(request -> {
                 CorsConfiguration config = new CorsConfiguration();
-                config.setAllowedOrigins(List.of("http://localhost:8081", "http://10.0.2.2:8081")); // Frontend URLs
-                config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH")); // HTTP methods allowed
-                config.setAllowedHeaders(List.of("Authorization", "Content-Type")); // Headers allowed
+                // Combine allowed origins
+                config.setAllowedOrigins(List.of("*", "http://localhost:8081", "http://10.0.2.2:8081")); // Frontend URLs
+                config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH")); // Allowed HTTP methods
+                config.setAllowedHeaders(List.of("Authorization", "Content-Type")); // Allowed headers
                 return config;
             }))
             .csrf(csrf -> csrf.disable()) // Disable CSRF for API requests
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/users/**").permitAll() // Allow access to API endpoints
-                .anyRequest().authenticated()
+                .requestMatchers("/api/users/**").permitAll() // Allow access to user-related API endpoints
+                .anyRequest().authenticated() // Require authentication for other requests
             )
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); // No sessions
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); // Stateless sessions
         return http.build();
     }
 }
