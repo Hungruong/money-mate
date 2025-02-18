@@ -26,4 +26,9 @@ public class AuthController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @GetMapping("/test")
+    public String testMessage() {
+        return "Hello Money Mate";
+    }
 }
