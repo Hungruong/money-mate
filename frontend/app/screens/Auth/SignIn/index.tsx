@@ -17,28 +17,34 @@ import { AuthNavigationProp } from "../../../types/navigation";
 import {
   GoogleSignin} from '@react-native-google-signin/google-signin';
 import auth from '@react-native-firebase/auth';
-
+import { SignInResponse } from "@react-native-google-signin/google-signin";
+import { UserInfo } from "firebase/auth";
 
 export default function SignInScreen({ setIsAuthenticated }: { setIsAuthenticated: (value: boolean) => void }) {
   const navigation = useNavigation<AuthNavigationProp>();
-  //GoogleSignin.configure({
-    //webClientId: '862178463544-f75l6o1jr0es3iu54ogdakev2qtopv40.apps.googleusercontent.com',
-  //});
-  /*const signInWithGoogle =async()=>{
+  GoogleSignin.configure({
+    iosClientId: '862178463544-f75l6o1jr0es3iu54ogdakev2qtopv40.apps.googleusercontent.com',
+  });
+  const signInWithGoogle =async()=>{
     try{
-    const userInfo = await GoogleSignin.signIn()
-    const getToken = await GoogleSignin.getTokens()
-    //console.log(getToken)
-    const googleCredential=auth.GoogleAuthProvider.credential(getToken.idToken);
-      const user_sign_in=auth().signInWithCredential(googleCredential);
-      user_sign_in.then(re=>{
-        console.log(re);
-      })
+      await GoogleSignin.hasPlayServices({showPlayServicesUpdateDialog:true});
+      const userInfo =await GoogleSignin.signIn();
+      console.log(userInfo.data?.idToken)
+      const idToken=userInfo.data?.idToken ?? null;
+      if (!idToken){
+        console.error("NO ID AVA");
+      }
+      console.log("Sucess")
+      const googleCredential=auth.GoogleAuthProvider.credential(idToken);
+      console.log("Sucess2")
+      return auth().signInWithCredential(googleCredential)
     }catch(error){
-      console.log('error')
+      console.log(error);
     }
 
-  }*/
+      }
+
+  
 
   return (
     <View style={styles.root}>
@@ -48,13 +54,9 @@ export default function SignInScreen({ setIsAuthenticated }: { setIsAuthenticate
         <Text style={styles.title}>Sign In</Text>
         <Text style={styles.subtitle}>Hi! Welcome back</Text>
         {/*Button*/}
-        <Button
-          title="Google Sign-In"
-          //onPress={signInWithGoogle =>console.log("Success")}
-        />        
-        <TouchableOpacity onPress={() => {console.log("Handle Google Sign In")}}>
-          <Image source={require("@/assets/images/google_logo.jpg")} style={styles.logo} />
-        </TouchableOpacity>
+        
+             
+
 
 
         {/* Email Input */}
@@ -78,7 +80,7 @@ export default function SignInScreen({ setIsAuthenticated }: { setIsAuthenticate
 
         {/* Alternative Sign In */}
         <Text style={styles.text}>Or sign in with</Text>
-        <TouchableOpacity onPress={() => console.log("Handle Google Sign In")}>
+        <TouchableOpacity onPress={(signInWithGoogle)}>
           <Image source={require("@/assets/images/google_logo.jpg")} style={styles.logo} />
         </TouchableOpacity>
 
