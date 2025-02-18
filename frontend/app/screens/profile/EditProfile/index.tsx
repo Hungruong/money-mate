@@ -78,6 +78,12 @@ const EditProfileScreen = ({
       email,
     };
 
+    // Only include password if the user has entered a new one
+    if (password.trim() !== "") {
+      updatedData.password = password;
+      console.log("Including new password:", password); 
+    }
+
     // Detect changes
     const changes = Object.fromEntries(
       Object.entries(updatedData).filter(
@@ -118,7 +124,7 @@ const EditProfileScreen = ({
 
   return (
     <ImageBackground
-      source={require("../../../../assets/images/image_background.png")}
+      source={require("../../../../assets/images/background5.png")}
       style={styles.backgroundImage}
     >
       <View style={styles.container}>
@@ -127,7 +133,7 @@ const EditProfileScreen = ({
           <View style={styles.avatarContainer}>
             <Image
               style={styles.avatar}
-              source={require("../../../../assets/images/profile.webp")}
+              source={require("../../../../assets/images/background5.png")}
             />
             <TouchableOpacity style={styles.uploadButton}>
               <Ionicons name="add-circle" size={24} color="#666" />
@@ -175,6 +181,17 @@ const EditProfileScreen = ({
               setEmail(text);
             }}
             keyboardType="email-address"
+          />
+
+          <Text style={styles.label}>Password (Leave blank if unchanged)</Text>
+          <TextInput
+            style={styles.input}
+            value={password}
+            onChangeText={(text) => {
+              console.log("Password changed to:", text); 
+              setPassword(text);
+            }}
+            secureTextEntry
           />
         </View>
 

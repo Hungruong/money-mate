@@ -2,6 +2,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import ProfileScreen from '../screens/profile/Profile';
 import EditProfileScreen from '../screens/profile/EditProfile';
+import ChangePassword from '../screens/profile/ChangePassword';
 import HomeScreen from '../screens/home';
 import TradingScreen from '../screens/trading';
 import GroupSavingScreen from '../screens/GroupSaving';
@@ -15,13 +16,10 @@ type RootStackParamList = {
   Billsplit: undefined;
   GroupSaving: undefined;
   HomeScreen: undefined;
-
-  
+  ChangePassword: undefined; // Add the missing key "ChangePassword"
 };
 
-
 const Stack = createStackNavigator<RootStackParamList>();
-
 
 const AppNavigator = () => {
  return (
@@ -32,9 +30,8 @@ const AppNavigator = () => {
        <Stack.Screen name="Billsplit" component={BillSplitScreen} />
        <Stack.Screen name="GroupSaving" component={GroupSavingScreen} />
        <Stack.Screen name="HomeScreen" component={HomeScreen} />
-       
+       <Stack.Screen name="ChangePassword" component={ChangePassword} />
      </Stack.Navigator>
-
  );
 };
 
