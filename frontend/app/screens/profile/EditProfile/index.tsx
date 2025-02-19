@@ -37,7 +37,7 @@ const EditProfileScreen = ({
     console.log("Fetching user data...");
     const fetchUserData = async () => {
       try {
-        const userId = "ef3f965a-edb6-49ae-8247-b8aaf1b1d434"; // This is mock userId
+        const userId = "ef3f965a-edb6-49ae-8247-b8aaf1b1d434"; // This is mock userId, please dont test delete with this
         console.log("Using userId:", userId); 
         const response = await fetch(API_URL + "/" + userId);
         if (!response.ok) throw new Error("Failed to fetch user data");
@@ -181,17 +181,6 @@ const EditProfileScreen = ({
               setEmail(text);
             }}
             keyboardType="email-address"
-          />
-
-          <Text style={styles.label}>Password (Leave blank if unchanged)</Text>
-          <TextInput
-            style={styles.input}
-            value={password}
-            onChangeText={(text) => {
-              console.log("Password changed to:", text); 
-              setPassword(text);
-            }}
-            secureTextEntry
           />
         </View>
 

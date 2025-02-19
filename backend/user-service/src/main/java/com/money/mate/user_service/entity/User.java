@@ -59,13 +59,16 @@ public class User {
         updatedAt = new Date();
     }
 
-    public void setPassword(String hashedNewPassword) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setPassword'");
+    // New password field
+    @Column(nullable = false)
+    private String password;
+
+    // Getter for password
+    public String getPassword() {
+        return this.password;
     }
 
-    public String getPassword() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getPassword'");
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

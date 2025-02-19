@@ -23,20 +23,20 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.configurationSource(request -> {
-                CorsConfiguration config = new CorsConfiguration();
-                // Combine allowed origins
-                config.setAllowedOrigins(List.of("*", "http://localhost:8081", "http://10.0.2.2:8081")); // Frontend URLs
-                config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH")); // Allowed HTTP methods
-                config.setAllowedHeaders(List.of("Authorization", "Content-Type")); // Allowed headers
-                return config;
-            }))
-            .csrf(csrf -> csrf.disable()) // Disable CSRF for API requests
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/users/**").permitAll() // Allow access to user-related API endpoints
-                .anyRequest().authenticated() // Require authentication for other requests
-            )
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); // Stateless sessions
+                .cors(cors -> cors.configurationSource(request -> {
+                    CorsConfiguration config = new CorsConfiguration();
+                    config.setAllowedOrigins(List.of("http://localhost:8081", "http://10.0.2.2:8081")); // Remove "*"
+                    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH")); // Allowed HTTP methods
+                    config.setAllowedHeaders(List.of("*")); // Allow all headers
+                    config.setAllowCredentials(true); // Needed for authentication
+                    return config;
+                }))
+                .csrf(csrf -> csrf.disable()) // Disable CSRF for API requests
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll() // Allow all requests (TEMP TEST)
+                )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); // Stateless
+                                                                                                               // sessions
         return http.build();
     }
 }
