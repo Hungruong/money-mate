@@ -36,24 +36,30 @@ public class UserService {
         userRepository.deleteById(userId);
     }
 
-    public User changePassword(UUID userId, ChangePasswordRequest request) {
-        // Retrieve the user by ID
-        User existingUser = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
-
-        // Validate the current password
-        if (!passwordEncoder.matches(request.getCurrentPassword(), existingUser.getPassword())) {
-            throw new IllegalArgumentException("Current password is incorrect");
+    public void changePassword(ChangePasswordRequest request) {
+        try {
+            UUID userId = UUID.fromString("3ef4e5f5-105e-4337-a6d5-934139a44867");
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new EntityNotFoundException("User not found"));
+    
+            System.out.println("User found: " + user.getUserName()); // Log user info
+            
+            // Validate password match
+            if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+                System.out.println("Password mismatch: " + request.getCurrentPassword());
+                throw new IllegalArgumentException("Current password is incorrect");
+            }
+    
+            user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+            userRepository.save(user);
+            System.out.println("Password updated successfully for user: " + user.getUserName());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to change password: " + e.getMessage(), e); // Re-throwing the exception with a specific message
         }
-
-        // Hash and update the new password
-        String hashedNewPassword = passwordEncoder.encode(request.getNewPassword());
-        existingUser.setPassword(hashedNewPassword);
-
-        // Save the updated user
-        return userRepository.save(existingUser);
     }
-
+    
+    
     public User updateUser(UUID userId, User updatedUser) {
         System.out.println("Updating user with ID: " + userId);
         // Retrieve the user from the database

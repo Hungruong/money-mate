@@ -6,64 +6,47 @@ const API_URL = "http://localhost:8082/api/users"; // Backend API URL to update 
 const ChangePassword: React.FC = () => {
   const [currentPassword, setCurrentPassword] = useState<string>("");
   const [newPassword, setNewPassword] = useState<string>("");
-  const userID = "3ef4e5f5-105e-4337-a6d5-934139a44867"; // this is for testing
 
   const handleSubmit = async () => {
-    // Log the current state of passwords before submitting
-    console.log("Submitting change with:", { currentPassword, newPassword });
-  
+    console.log("Submitting change with:", {currentPassword, newPassword });
+
     if (!currentPassword || !newPassword) {
       Alert.alert("Error", "Please fill in all fields.");
       return;
     }
-  
+
     try {
-      // Log the request payload
       console.log("Sending request with body:", {
         currentPassword,
         newPassword,
       });
-  
+
       const response = await fetch(`${API_URL}/change-password`, {
-        method: "PUT", // Change to PUT as per backend
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           currentPassword,
           newPassword,
-          userID, // Send userID in the request
         }),
       });
-  
-      // Check if the response is ok (status code 200-299)
+
+      const responseData = await response.json();
+
       if (!response.ok) {
-        // If not ok, try to parse the response as JSON, otherwise, return plain text
-        const textResponse = await response.text(); // Get the response text
-        let parsedResponse;
-  
-        try {
-          parsedResponse = JSON.parse(textResponse); // Try to parse as JSON
-        } catch (e) {
-          parsedResponse = { message: textResponse }; // If parsing fails, use plain text as message
-        }
-  
-        // Log backend errors if any
-        Alert.alert("Error", parsedResponse.message || "Failed to update password.");
-        return;
+        throw new Error(responseData.message || "Failed to change password.");
       }
-  
-      // Try to parse the response as JSON
-      const data = await response.json();
-      console.log("API Response:", data);
-  
+
       Alert.alert("Success", "Password updated successfully!");
-    } catch (error) {
+      setCurrentPassword(""); // Clear input fields after success
+      setNewPassword("");
+    } catch (error: any) {
       console.error("Error updating password:", error);
-      Alert.alert("Error", "Something went wrong. Please try again later.");
+      Alert.alert("Error", error.message || "Something went wrong. Please try again later.");
     }
-  };  
-  
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Change Password</Text>
@@ -75,7 +58,7 @@ const ChangePassword: React.FC = () => {
           placeholder="Enter current password"
           value={currentPassword}
           onChangeText={(text) => {
-            console.log("Current Password input:", text);  // Log input change
+            console.log("Current Password input:", text); // Log input change
             setCurrentPassword(text);
           }}
           secureTextEntry
@@ -87,7 +70,7 @@ const ChangePassword: React.FC = () => {
           placeholder="Enter new password"
           value={newPassword}
           onChangeText={(text) => {
-            console.log("New Password input:", text);  // Log input change
+            console.log("New Password input:", text); // Log input change
             setNewPassword(text);
           }}
           secureTextEntry
