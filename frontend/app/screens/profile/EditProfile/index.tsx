@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import {
   View,
   Text,
@@ -15,7 +14,7 @@ import { NavigationProp } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 
 const { width } = Dimensions.get("window");
-const API_URL = "http://localhost:8082/api/users"; // Updated API URL
+const API_URL = "http://localhost:8082/api/users";
 
 const EditProfileScreen = ({
   navigation,

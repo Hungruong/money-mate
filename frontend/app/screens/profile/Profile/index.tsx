@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Image, ImageBackground } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Image, ImageBackground, Alert } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from "@expo/vector-icons";
 
@@ -65,6 +65,28 @@ const ProfileScreen = ({ navigation }: ProfileScreenProps) => {
 
     fetchUserData();
   }, []);
+
+  const handleDeleteAccount = async () => {
+    try {
+      const userID = 'ef3f965a-edb6-49ae-8247-b8aaf1b1d434'; // mock userID to delete
+      const response = await fetch(`${API_URL}/delete`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (response.ok) {
+        Alert.alert("Account deleted successfully!", "", [
+          { text: "OK", onPress: () => navigation.navigate('HomeScreen') }
+        ]);
+      } else {
+        const errorData = await response.json();
+        alert("Failed to delete account: " + errorData.message);
+      }
+    } catch (error) {
+      console.error('Error deleting account:', error);
+    }
+  }
 
   const accountServices = [
     {
@@ -161,14 +183,18 @@ const ProfileScreen = ({ navigation }: ProfileScreenProps) => {
         <View style={styles.bottomButtonsContainer}>
           <TouchableOpacity
             style={styles.deleteButton}
-            onPress={() => navigation.navigate('EditProfile')}
+            onPress={handleDeleteAccount} 
           >
             <Text style={styles.buttonText}>Delete Account</Text>
           </TouchableOpacity>
           
-          <TouchableOpacity style={styles.logoutButton}>
+          <TouchableOpacity 
+            style={styles.logoutButton} 
+            onPress={() => navigation.navigate('HomeScreen')}
+          >
             <Text style={styles.buttonText}>Log Out</Text>
           </TouchableOpacity>
+
         </View>
       </View>
     </ImageBackground>
