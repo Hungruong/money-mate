@@ -58,4 +58,17 @@ public class User {
     protected void onUpdate() {
         updatedAt = new Date();
     }
+
+    // New password field
+    @Column(nullable = false)
+    private String password;
+
+    // Getter for password
+    public String getPassword() {
+        return this.password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }

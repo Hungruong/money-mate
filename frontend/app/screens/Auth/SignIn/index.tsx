@@ -3,15 +3,11 @@ import { View, Text, Button } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { AuthNavigationProp } from "../../../types/navigation";
 import { Image, StyleSheet, Platform } from 'react-native';
-
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-
-
 import { TextInput } from 'react-native';
-
 import React, {useCallback} from 'react';
 import {Alert, Linking} from 'react-native';
 import {ImageBackground} from 'react-native';
@@ -84,7 +80,6 @@ export default function SignInScreen({ setIsAuthenticated }: { setIsAuthenticate
   </View>
   );
 }
-
 
 const styles=StyleSheet.create({
   root: {flex:1, fontFamily:'GeneralSans-Regular'},
