@@ -1,5 +1,4 @@
 import React from "react";
-import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import TradingScreen from "../screens/trading/Trading";
 import Portfolio from "../screens/trading/Portfolio";
@@ -12,7 +11,7 @@ const Stack = createStackNavigator();
 
 const TradingNavigator = () => {
   return (
-      <Stack.Navigator initialRouteName="Dashboard">
+      <Stack.Navigator initialRouteName="Trading">
         <Stack.Screen name="Trading" component={TradingScreen} />
         <Stack.Screen name="Portfolio" component={Portfolio} />
         <Stack.Screen name="TransactionHistory" component={TransactionHistory} />

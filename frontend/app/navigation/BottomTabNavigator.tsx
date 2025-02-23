@@ -29,7 +29,7 @@ export default function BottomTabNavigator() {
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Trading" component={TradingScreen} />
+      <Tab.Screen name="Trading" component={TradingNavigator} />
       <Tab.Screen name="Group Saving" component={GroupSavingScreen} />
       <Tab.Screen name="Bill Split" component={BillSplitScreen} />
       <Tab.Screen name="Profile" component={AppNavigator} />
