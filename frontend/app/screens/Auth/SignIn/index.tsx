@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     width: "100%",
-    height: "100%",
+    //height: "100%",
   },
   title: {
     textAlign: "center", 
@@ -91,12 +91,13 @@ const styles = StyleSheet.create({
   },
   inputTextbox: {
     height: 40,
-    width: 370,
+    //width: "100%",
     margin: 10,
     borderWidth: 1,
     color: "grey",
     borderRadius: 10,
     paddingLeft: 10,
+    
   },
   forgotPasswordText: {
     color: "#91337b", 

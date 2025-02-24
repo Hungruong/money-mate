@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 40,
-    width: 370,
+    //width: 370,
     margin: 10,
     borderWidth: 1,
     borderRadius: 10,
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#91337b",
     padding: 15,
     borderRadius: 10,
-    width: 370,
+    
     alignSelf: "center",
     alignItems: "center",
   },
