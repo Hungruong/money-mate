@@ -2,16 +2,22 @@ import { createStackNavigator } from "@react-navigation/stack";
 import SignInScreen from "../screens/Auth/SignIn";
 import SignUpScreen from "../screens/Auth/SignUp";
 import { AuthStackParamList } from "../types/navigation";
+import  GroupCreate from '../screens/Auth/SignIn/groupCreate';
 
-const Stack = createStackNavigator<AuthStackParamList>();
 
-export default function AuthNavigator({ setIsAuthenticated }: { setIsAuthenticated: (value: boolean) => void }) {
+type RootStackParamList = {
+  GroupCreate:undefined;
+  SignUp:undefined;
+  SignIn:undefined;
+};
+const Stack = createStackNavigator<RootStackParamList>();
+const AuthNavigator=()=> {
   return (
-    <Stack.Navigator initialRouteName="SignIn" screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="SignIn">
-        {(props) => <SignInScreen {...props} setIsAuthenticated={setIsAuthenticated} />}
-      </Stack.Screen>
+    <Stack.Navigator initialRouteName="SignIn" >
       <Stack.Screen name="SignUp" component={SignUpScreen} />
+      <Stack.Screen name="GroupCreate" component={GroupCreate} />
     </Stack.Navigator>
   );
 }
+
+export default AuthNavigator

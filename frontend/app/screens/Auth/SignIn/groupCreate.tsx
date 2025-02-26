@@ -1,11 +1,9 @@
 import { View, Text } from "react-native";
 
-export default function GroupSavingScreen() {
+export default function GroupCreate() {
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text style={{ fontSize: 24, fontWeight: "bold" }}>Group Saving</Text>
-      
-
+      <Text style={{ fontSize: 24, fontWeight: "bold" }}>Create Group</Text>
     </View>
   );
 }
