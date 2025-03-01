@@ -22,9 +22,6 @@ public class Investment {
     @Column(nullable = false)
     private UUID userId; // User who owns the investment
 
-    @Column(nullable = false, length = 20)
-    private String type; // "manual" or "auto"
-
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal allocatedAmount;
 
@@ -37,10 +34,24 @@ public class Investment {
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal purchasePrice; // Price per share
 
-    @Column(precision = 12, scale = 2)
+    @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal currentPrice; // Latest stock price
+
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal closedPrice; // Price at which the stock was closed
+
+    @Column(nullable = false, length = 10)
+    private String status; // Status of the investment
+
+    @Column(nullable = false)
+    private String type; //buy or sell
 
     @Column(nullable = false, updatable = false)
     @Builder.Default
     private Instant createdAt = Instant.now();
+
+    public void setStatus(String string) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setStatus'");
+    }
 }
