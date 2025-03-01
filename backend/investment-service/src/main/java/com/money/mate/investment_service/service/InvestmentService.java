@@ -33,7 +33,7 @@ public class InvestmentService {
     // Manually buy stock and save the investment
     public Investment buyStock(UUID userId, String symbol, BigDecimal price, BigDecimal quantity) {
         Investment investment = investmentRepository.findByUserIdAndSymbol(userId, symbol)
-                .orElse(new Investment(UUID.randomUUID(), userId, BigDecimal.ZERO, symbol, BigDecimal.ZERO, price, price, price, null));
+                .orElse(new Investment(UUID.randomUUID(), userId, BigDecimal.ZERO, symbol, BigDecimal.ZERO, price, price, price, null, symbol, null));
 
         // Update quantity and total allocated amount
         investment.setQuantity(investment.getQuantity().add(quantity));
