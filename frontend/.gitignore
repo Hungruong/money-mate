@@ -28,7 +28,7 @@ yarn-error.*
 # macOS
 .DS_Store
 *.pem
-
+ios/
 # local env files
 .env*.local
 
@@ -36,3 +36,4 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+
