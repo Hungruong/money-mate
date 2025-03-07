@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
-@Entity 
+@Entity
 @Table(name = "transactions")
 @Getter
 @Setter
@@ -30,10 +30,10 @@ public class Transactions {
     @Column(name = "quantity", nullable = false, precision = 12, scale = 4)
     private BigDecimal quantity; // number of shares
 
-    @Column(name="price", nullable = false, precision = 12, scale = 2)
+    @Column(name = "price", nullable = false, precision = 12, scale = 2)
     private BigDecimal price; // price of the stock
 
-    @Column(name="total_amount", nullable = false, precision = 12, scale = 2)
+    @Column(name = "total_amount", nullable = false, precision = 12, scale = 2)
     private BigDecimal totalAmount; // total amount of the transaction
 
     @Column(name = "timestamp", nullable = false, updatable = false)
@@ -41,7 +41,7 @@ public class Transactions {
     private Instant timestamp = Instant.now(); // Timestamp of the transansaction
 
     public enum TransactionType {
-        BUY, 
+        BUY,
         SELL
-    }    
+    }
 }
