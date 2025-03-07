@@ -1,74 +1,104 @@
 package com.money.mate.investment_service.service;
 
 import com.money.mate.investment_service.entity.Investment;
+import com.money.mate.investment_service.entity.Investment.InvestmentStatus;
+import com.money.mate.investment_service.entity.Transactions.TransactionType;
+import com.money.mate.investment_service.entity.Transactions;
 import com.money.mate.investment_service.repository.InvestmentRepository;
+import com.money.mate.investment_service.repository.TransactionsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Service
+@Service // the controller method delegate actual business logic to the service
 @RequiredArgsConstructor
 public class InvestmentService {
+    public void buyAsset(UUID userId, String symbol, BigDecimal quantity, BigDecimal price) {
+        BigDecimal total = quantity.multiply(price);
+        Optional<Investment> existingInvestment = getInvestmentByUserIdSymbolStatus(userId, symbol,
+                InvestmentStatus.ACTIVE);
+        Investment investment;
+
+        if (existingInvestment.isPresent()) {
+            investment = existingInvestment.get();
+            investment.setTotalBoughtQuantity(investment.getTotalBoughtQuantity().add(quantity));
+            investment.setCurrentQuantity(investment.getCurrentQuantity().add(quantity));
+            investment.setAllocatedCapital(investment.getAllocatedCapital().add(total));
+        } else {
+            // Scenario 1 & 3: No active investment, create a new one
+            investment = new Investment();
+            investment.setInvestmentId(UUID.randomUUID());
+            investment.setUserId(userId);
+            investment.setSymbol(symbol);
+            investment.setTotalBoughtQuantity(quantity);
+            investment.setCurrentQuantity(quantity);
+            investment.setAllocatedCapital(total);
+            investment.setAveragePrice(price);
+            investment.setStatus(InvestmentStatus.ACTIVE);
+        }
+
+        saveInvestment(investment);
+
+        Transactions transaction = new Transactions();
+        transaction.setTransactionId(userId);
+        transaction.setInvestment(investment);
+        transaction.setType(TransactionType.BUY);
+        transaction.setQuantity(quantity);
+        transaction.setPrice(price);
+        transaction.setTotalAmount(total);
+
+        transactionsRepository.save(transaction);
+    }
+
+    public void sellAsset(UUID userId, String symbol, BigDecimal quantity, BigDecimal price) {
+        BigDecimal total = quantity.multiply(price);
+        Optional<Investment> existingInvestment = getInvestmentByUserIdSymbolStatus(userId, symbol,
+                InvestmentStatus.ACTIVE);
+        Investment investment;
+
+        if (existingInvestment.isPresent()) {
+            investment = existingInvestment.get();
+
+            if (investment.getCurrentQuantity().compareTo(quantity) < 0) {
+                throw new IllegalArgumentException("Not enough quantity to sell");
+            }
+
+            investment.setTotalSoldQuantity(investment.getTotalSoldQuantity().add(quantity));
+            investment.setCurrentQuantity(investment.getCurrentQuantity().subtract(quantity));
+            investment.setAllocatedCapital(investment.getAllocatedCapital().subtract(total));
+
+            if (investment.getCurrentQuantity().compareTo(BigDecimal.ZERO) == 0) {
+                investment.setStatus(InvestmentStatus.CLOSED);
+            }
+
+            investmentRepository.save(investment);
+
+            Transactions transaction = new Transactions();
+            transaction.setTransactionId(userId);
+            transaction.setInvestment(investment);
+            transaction.setType(TransactionType.SELL);
+            transaction.setQuantity(quantity);
+            transaction.setPrice(price);
+            transaction.setTotalAmount(total);
+
+            transactionsRepository.save(transaction);
+        } else {
+            throw new IllegalArgumentException("No active investment found");
+        }
+    }
+
     private final InvestmentRepository investmentRepository;
+    private final TransactionsRepository transactionsRepository;
 
-    public Investment saveInvestment(Investment investment) {
-        return investmentRepository.save(investment);
+    private void saveInvestment(Investment investment) {
+        investmentRepository.save(investment);
     }
 
-    public List<Investment> getUserInvestments(UUID userId) {
-        return investmentRepository.findByUserId(userId);
-    }
-
-    public Optional<Investment> getInvestmentById(UUID investmentId) {
-        return investmentRepository.findById(investmentId);
-    }
-
-    public void deleteInvestment(UUID investmentId) {
-        investmentRepository.deleteById(investmentId);
-    }
-    // Manually buy stock and save the investment
-    public Investment buyStock(UUID userId, String symbol, BigDecimal price, BigDecimal quantity) {
-        Investment investment = investmentRepository.findByUserIdAndSymbol(userId, symbol)
-                .orElse(new Investment(UUID.randomUUID(), userId, BigDecimal.ZERO, symbol, BigDecimal.ZERO, price, price, price, null, symbol, null));
-
-        // Update quantity and total allocated amount
-        investment.setQuantity(investment.getQuantity().add(quantity));
-        investment.setAllocatedAmount(investment.getAllocatedAmount().add(price.multiply(quantity)));
-
-        // Update the purchase price to reflect the latest price (could be an average or the most recent price)
-        investment.setPurchasePrice(price);
-        investment.setCurrentPrice(price);
-
-        // Save the investment (buy stock)
-        return investmentRepository.save(investment);
-    }
-    // Manually sell stock and update the investment
-    public Investment sellStock(UUID userId, String symbol, BigDecimal price, BigDecimal quantity) {
-        // Fetch the existing investment
-        Investment investment = investmentRepository.findByUserIdAndSymbol(userId, symbol)
-                .orElseThrow(() -> new IllegalArgumentException("Investment not found"));
-
-        // Ensure the user has enough shares to sell
-        if (investment.getQuantity().compareTo(quantity) < 0) {
-            throw new IllegalArgumentException("Not enough shares to sell");
-        }
-
-        // Update the quantity after selling
-        investment.setQuantity(investment.getQuantity().subtract(quantity));
-        investment.setAllocatedAmount(investment.getAllocatedAmount().subtract(price.multiply(quantity)));
-
-        // If all shares are sold, mark as closed
-        if (investment.getQuantity().compareTo(BigDecimal.ZERO) == 0) {
-            investment.setStatus("closed");
-            investment.setClosedPrice(price);
-        }
-
-        // Save the updated investment
-        return investmentRepository.save(investment);
+    private Optional<Investment> getInvestmentByUserIdSymbolStatus(
+            UUID userId, String symbol, InvestmentStatus status) {
+        return investmentRepository.findByUserIdAndSymbolAndStatus(userId, symbol, status);
     }
 }
-
