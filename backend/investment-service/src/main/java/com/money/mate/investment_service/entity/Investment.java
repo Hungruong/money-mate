@@ -75,4 +75,7 @@ public class Investment {
         PAUSED,
         STOPPED
     }
+
+    @Version
+    private Long version;
 }

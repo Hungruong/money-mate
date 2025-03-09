@@ -1,5 +1,6 @@
 package com.money.mate.investment_service.service;
 
+import com.money.mate.investment_service.controller.InvestmentController;
 import com.money.mate.investment_service.entity.Investment;
 import com.money.mate.investment_service.entity.Investment.InvestmentStatus;
 import com.money.mate.investment_service.entity.Transactions.TransactionType;
@@ -8,6 +9,8 @@ import com.money.mate.investment_service.repository.InvestmentRepository;
 import com.money.mate.investment_service.repository.TransactionsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -16,11 +19,15 @@ import java.util.UUID;
 @Service // the controller method delegate actual business logic to the service
 @RequiredArgsConstructor
 public class InvestmentService {
+    private static final Logger logger = LoggerFactory.getLogger(InvestmentController.class);
+
     public void buyAsset(UUID userId, String symbol, BigDecimal quantity, BigDecimal price) {
         BigDecimal total = quantity.multiply(price);
         Optional<Investment> existingInvestment = getInvestmentByUserIdSymbolStatus(userId, symbol,
                 InvestmentStatus.ACTIVE);
         Investment investment;
+
+        logger.info("abc");
 
         if (existingInvestment.isPresent()) {
             investment = existingInvestment.get();
@@ -40,7 +47,11 @@ public class InvestmentService {
             investment.setStatus(InvestmentStatus.ACTIVE);
         }
 
+        logger.info("def");
+
         saveInvestment(investment);
+
+        logger.info("123");
 
         Transactions transaction = new Transactions();
         transaction.setTransactionId(userId);
@@ -50,7 +61,11 @@ public class InvestmentService {
         transaction.setPrice(price);
         transaction.setTotalAmount(total);
 
+        logger.info("456");
+
         transactionsRepository.save(transaction);
+
+        logger.info("789");
     }
 
     public void sellAsset(UUID userId, String symbol, BigDecimal quantity, BigDecimal price) {
@@ -93,12 +108,19 @@ public class InvestmentService {
     private final InvestmentRepository investmentRepository;
     private final TransactionsRepository transactionsRepository;
 
-    private void saveInvestment(Investment investment) {
+    public void saveInvestment(Investment investment) {
+        logger.info("Saving investment: " + investment);
         investmentRepository.save(investment);
+        logger.info("done saveInvestment");
     }
 
     private Optional<Investment> getInvestmentByUserIdSymbolStatus(
             UUID userId, String symbol, InvestmentStatus status) {
         return investmentRepository.findByUserIdAndSymbolAndStatus(userId, symbol, status);
+    }
+
+    public Object getUserInvestments(UUID userId) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getUserInvestments'");
     }
 }
