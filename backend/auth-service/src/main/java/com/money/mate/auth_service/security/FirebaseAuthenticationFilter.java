@@ -28,31 +28,30 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         String authorizationHeader = request.getHeader("Authorization");
-        
+
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             String token = authorizationHeader.substring(7);
             try {
                 FirebaseToken decodedToken = firebaseAuth.verifyIdToken(token);
                 UserDetails user = buildUserDetails(decodedToken);
-                
+
                 Authentication auth = new FirebaseAuthenticationToken(
-                    user,
-                    user.getAuthorities()
-                );
+                        user,
+                        user.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(auth);
             } catch (FirebaseAuthException e) {
                 SecurityContextHolder.clearContext();
             }
         }
-        
+
         filterChain.doFilter(request, response);
     }
 
     private UserDetails buildUserDetails(FirebaseToken token) {
         return User.builder()
-            .username(token.getUid())
-            .password("")
-            .authorities(Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")))
-            .build();
+                .username(token.getUid())
+                .password("")
+                .authorities(Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")))
+                .build();
     }
 }
