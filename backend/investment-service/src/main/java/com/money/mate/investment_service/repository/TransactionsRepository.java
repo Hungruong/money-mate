@@ -8,4 +8,5 @@ import java.util.UUID;
 public interface TransactionsRepository extends JpaRepository<Transactions, UUID> {
     
     
+    
 }

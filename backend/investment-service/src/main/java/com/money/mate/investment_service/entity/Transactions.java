@@ -16,7 +16,7 @@ import java.util.UUID;
 @Builder
 public class Transactions {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID transactionId;
 
     @ManyToOne
@@ -44,4 +44,9 @@ public class Transactions {
         BUY,
         SELL
     }
+
+    @Version
+    @Builder.Default
+    private Integer version = 0;
+    
 }

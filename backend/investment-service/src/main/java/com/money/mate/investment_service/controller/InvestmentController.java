@@ -4,6 +4,7 @@ import com.money.mate.investment_service.service.InvestmentService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +30,9 @@ public class InvestmentController {
         } catch (IllegalArgumentException e) {
             logger.error("Error buying investment: {}", e.getMessage(), e);
             return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (OptimisticLockingFailureException e) {
+            logger.error("Optimistic locking failure while saving investment: " + request);
+            return ResponseEntity.status(500).body("Error buying investment. Please try again.");
         }
     }
 

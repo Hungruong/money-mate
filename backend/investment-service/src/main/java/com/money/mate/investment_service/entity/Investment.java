@@ -17,7 +17,7 @@ import java.util.UUID;
 @Builder
 public class Investment {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID investmentId;
 
     @Column(nullable = false)
@@ -65,6 +65,11 @@ public class Investment {
     @Column(name = "updated_at")
     private Instant updatedAt; // Timestamp for when the investment was last updated
 
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = Instant.now();
+    }
+
     public enum InvestmentType {
         MANUAL, AUTO
     }
@@ -77,5 +82,6 @@ public class Investment {
     }
 
     @Version
-    private Long version;
+    @Builder.Default
+    private Integer version = 0;
 }
