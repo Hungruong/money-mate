@@ -7,8 +7,14 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.OptimisticLockType;
+import org.hibernate.annotations.OptimisticLocking;
+
 // map to database table, you can easily use Spring built-in function to interact with the database instead of manually writing the SQL queries
 @Entity
+@DynamicUpdate
+@OptimisticLocking(type = OptimisticLockType.ALL)
 @Table(name = "investments")
 @Getter
 @Setter
@@ -82,6 +88,6 @@ public class Investment {
     }
 
     @Version
-    @Builder.Default
-    private Integer version = 0;
+    private Long version;
+
 }

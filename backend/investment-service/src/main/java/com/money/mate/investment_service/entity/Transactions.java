@@ -7,7 +7,13 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.OptimisticLockType;
+import org.hibernate.annotations.OptimisticLocking;
+
 @Entity
+@DynamicUpdate
+@OptimisticLocking(type = OptimisticLockType.ALL)
 @Table(name = "transactions")
 @Getter
 @Setter
@@ -46,7 +52,6 @@ public class Transactions {
     }
 
     @Version
-    @Builder.Default
-    private Integer version = 0;
-    
+    private Long version;
+
 }
