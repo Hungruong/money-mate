@@ -57,8 +57,9 @@ public class Investment {
     @Column(name = "type", nullable = false, length = 10)
     private InvestmentType type; // manual or auto
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "strategy", nullable = false, length = 10)
-    private String strategy; // value or growth
+    private InvestmentStrategy strategy; // value or growth
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 10)
@@ -77,14 +78,20 @@ public class Investment {
     }
 
     public enum InvestmentType {
-        MANUAL, AUTO
+        manual, auto
     }
 
     public enum InvestmentStatus {
-        ACTIVE,
-        CLOSED,
-        PAUSED,
-        STOPPED
+        active,
+        closed,
+        paused,
+        stopped
+    }
+    
+    public enum InvestmentStrategy {
+        aggressive,
+        conservative, 
+        moderate
     }
 
     @Version

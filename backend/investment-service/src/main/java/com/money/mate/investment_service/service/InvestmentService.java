@@ -3,6 +3,7 @@ package com.money.mate.investment_service.service;
 import com.money.mate.investment_service.controller.InvestmentController;
 import com.money.mate.investment_service.entity.Investment;
 import com.money.mate.investment_service.entity.Investment.InvestmentStatus;
+import com.money.mate.investment_service.entity.Investment.InvestmentType;
 import com.money.mate.investment_service.entity.Transactions.TransactionType;
 import com.money.mate.investment_service.entity.Transactions;
 import com.money.mate.investment_service.repository.InvestmentRepository;
@@ -17,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -33,7 +35,7 @@ public class InvestmentService {
     public void buyAsset(UUID userId, String symbol, BigDecimal quantity, BigDecimal price) {
         BigDecimal total = quantity.multiply(price);
         Optional<Investment> existingInvestment = getInvestmentByUserIdSymbolStatus(userId, symbol,
-                InvestmentStatus.ACTIVE);
+                InvestmentStatus.active);
         Investment investment;
 
         logger.info("abc");
@@ -46,26 +48,62 @@ public class InvestmentService {
         } else {
             // Scenario 1 & 3: No active investment, create a new one
             investment = new Investment();
-            investment.setInvestmentId(UUID.randomUUID());
+
+            // Set the required fields with appropriate values
             investment.setUserId(userId);
+            logger.info("Set userId: {}", userId);
+
             investment.setSymbol(symbol);
+            logger.info("Set symbol: {}", symbol);
+
             investment.setTotalBoughtQuantity(quantity);
+            logger.info("Set totalBoughtQuantity: {}", quantity);
+
+            investment.setTotalSoldQuantity(BigDecimal.ZERO);
+
             investment.setCurrentQuantity(quantity);
+            logger.info("Set currentQuantity: {}", quantity);
+
             investment.setAllocatedCapital(total);
+            logger.info("Set allocatedCapital: {}", total);
+
             investment.setAveragePrice(price);
-            investment.setStatus(InvestmentStatus.ACTIVE);
+            logger.info("Set averagePrice: {}", price);
+
+            investment.setStatus(Investment.InvestmentStatus.active);
+            logger.info("Set status: {}", Investment.InvestmentStatus.active);
+
+            // Set the optional fields (using defaults or calculated values)
+            investment.setAllocatedAmount(total); // Assuming allocatedAmount is the same as allocatedCapital
+            logger.info("Set allocatedAmount: {}", total);
+
+            investment.setCurrentValue(total); // Assuming currentValue starts as allocatedAmount (may be calculated
+                                               // differently)
+            logger.info("Set currentValue: {}", total);
+
+            investment.setType(InvestmentType.manual); // Assuming this is the default, or you can change it to AUTO if
+                                                       // needed
+            logger.info("Set type: {}", InvestmentType.manual);
+
+            investment.setStrategy(Investment.InvestmentStrategy.aggressive); // Assuming strategy starts as "value" or
+                                                                              // you may want to set it
+            // dynamically
+            logger.info("Set strategy: {}", Investment.InvestmentStrategy.aggressive);
+
+            // Log the newly created investment with all fields set
+            logger.info("Created new investment: {}", investment);
         }
 
         logger.info("def");
 
-        saveInvestment(investment);
+        // saveInvestment(investment);
+        investment = investmentRepository.saveAndFlush(investment);
 
         logger.info("123");
 
         Transactions transaction = new Transactions();
-        transaction.setTransactionId(UUID.randomUUID());
         transaction.setInvestment(investment);
-        transaction.setType(TransactionType.BUY);
+        transaction.setType(TransactionType.buy);
         transaction.setQuantity(quantity);
         transaction.setPrice(price);
         transaction.setTotalAmount(total);
@@ -86,7 +124,7 @@ public class InvestmentService {
     public void sellAsset(UUID userId, String symbol, BigDecimal quantity, BigDecimal price) {
         BigDecimal total = quantity.multiply(price);
         Optional<Investment> existingInvestment = getInvestmentByUserIdSymbolStatus(userId, symbol,
-                InvestmentStatus.ACTIVE);
+                InvestmentStatus.active);
         Investment investment;
 
         if (existingInvestment.isPresent()) {
@@ -101,7 +139,7 @@ public class InvestmentService {
             investment.setAllocatedCapital(investment.getAllocatedCapital().subtract(total));
 
             if (investment.getCurrentQuantity().compareTo(BigDecimal.ZERO) == 0) {
-                investment.setStatus(InvestmentStatus.CLOSED);
+                investment.setStatus(InvestmentStatus.closed);
             }
 
             investmentRepository.save(investment);
@@ -109,7 +147,7 @@ public class InvestmentService {
             Transactions transaction = new Transactions();
             transaction.setTransactionId(userId);
             transaction.setInvestment(investment);
-            transaction.setType(TransactionType.SELL);
+            transaction.setType(TransactionType.sell);
             transaction.setQuantity(quantity);
             transaction.setPrice(price);
             transaction.setTotalAmount(total);
@@ -120,18 +158,31 @@ public class InvestmentService {
         }
     }
 
-    public void saveInvestment(Investment investment) {
-        logger.info("Saving investment: " + investment);
+    public Investment saveInvestment(Investment investment) {
+
         try {
-            investmentRepository.save(investment);
+            // Log the investment details being saved
+            logger.debug("Saving investment details: {}", investment);
+
+            // Perform the save operation
+            return investmentRepository.saveAndFlush(investment);
+            // Log successful saving
         } catch (OptimisticLockingFailureException e) {
+            // Log error in case of optimistic locking failure
             logger.error(
-                    "Saving investment: Optimistic Locking Failure: Entity has been modified by another transaction",
-                    e);
-            // Optionally, retry the operation or inform the user
+                    "Saving investment failed due to Optimistic Locking Failure: Investment ID = {}. Entity has been modified by another transaction.",
+                    investment.getInvestmentId(), e);
+
+            // Optionally, retry or handle the exception as needed
             throw new RuntimeException("Conflict detected. Please retry.", e);
+        } catch (Exception e) {
+            // Catch other potential exceptions and log them
+            logger.error("Unexpected error while saving investment: Investment ID = {}", investment.getInvestmentId(),
+                    e);
+            throw new RuntimeException("Error while saving investment.", e);
         }
-        logger.info("done saveInvestment");
+
+        // Final log after the save attempt (success or failure)
     }
 
     public void saveTransaction(Transactions transaction) {

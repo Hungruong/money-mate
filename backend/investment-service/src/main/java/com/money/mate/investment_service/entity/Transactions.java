@@ -47,8 +47,8 @@ public class Transactions {
     private Instant timestamp = Instant.now(); // Timestamp of the transansaction
 
     public enum TransactionType {
-        BUY,
-        SELL
+        buy,
+        sell
     }
 
     @Version
