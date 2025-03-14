@@ -10,5 +10,4 @@ public class InvestmentRequestDto {
     private UUID userId;
     private String symbol;
     private BigDecimal quantity;
-    private BigDecimal price;
 }

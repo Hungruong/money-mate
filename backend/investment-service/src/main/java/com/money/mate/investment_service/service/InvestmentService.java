@@ -4,34 +4,39 @@ import com.money.mate.investment_service.controller.InvestmentController;
 import com.money.mate.investment_service.entity.Investment;
 import com.money.mate.investment_service.entity.Investment.InvestmentStatus;
 import com.money.mate.investment_service.entity.Investment.InvestmentType;
-import com.money.mate.investment_service.entity.Transactions.TransactionType;
 import com.money.mate.investment_service.entity.Transactions;
+import com.money.mate.investment_service.entity.Transactions.TransactionType;
 import com.money.mate.investment_service.repository.InvestmentRepository;
 import com.money.mate.investment_service.repository.TransactionsRepository;
 import lombok.RequiredArgsConstructor;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
-@Service // the controller method delegate actual business logic to the service
+@Service
 @RequiredArgsConstructor
 public class InvestmentService {
     private static final Logger logger = LoggerFactory.getLogger(InvestmentController.class);
+
     @Autowired
     private final InvestmentRepository investmentRepository;
+
     @Autowired
     private final TransactionsRepository transactionsRepository;
 
+    @Autowired
+    private final MarketDataService marketDataService; // Add MarketDataService dependency
+
     @Transactional
-    public void buyAsset(UUID userId, String symbol, BigDecimal quantity, BigDecimal price) {
+    public void buyAsset(UUID userId, String symbol, BigDecimal quantity) {
+        BigDecimal price = marketDataService.getCurrentStockPrice(symbol);
         BigDecimal total = quantity.multiply(price);
         Optional<Investment> existingInvestment = getInvestmentByUserIdSymbolStatus(userId, symbol,
                 InvestmentStatus.active);
@@ -45,57 +50,38 @@ public class InvestmentService {
             investment.setCurrentQuantity(investment.getCurrentQuantity().add(quantity));
             investment.setAllocatedCapital(investment.getAllocatedCapital().add(total));
         } else {
-            // Scenario 1 & 3: No active investment, create a new one
             investment = new Investment();
-
-            // Set the required fields with appropriate values
             investment.setUserId(userId);
             logger.info("Set userId: {}", userId);
-
             investment.setSymbol(symbol);
             logger.info("Set symbol: {}", symbol);
-
             investment.setTotalBoughtQuantity(quantity);
             logger.info("Set totalBoughtQuantity: {}", quantity);
-
             investment.setTotalSoldQuantity(BigDecimal.ZERO);
-
             investment.setCurrentQuantity(quantity);
             logger.info("Set currentQuantity: {}", quantity);
-
             investment.setAllocatedCapital(total);
             logger.info("Set allocatedCapital: {}", total);
-
             investment.setAveragePrice(price);
             logger.info("Set averagePrice: {}", price);
-
-            investment.setStatus(Investment.InvestmentStatus.active);
-            logger.info("Set status: {}", Investment.InvestmentStatus.active);
-
-            // Set the optional fields (using defaults or calculated values)
-            investment.setAllocatedAmount(total); // Assuming allocatedAmount is the same as allocatedCapital
+            investment.setStatus(InvestmentStatus.active);
+            logger.info("Set status: {}", InvestmentStatus.active);
+            investment.setAllocatedAmount(total);
             logger.info("Set allocatedAmount: {}", total);
-
-            investment.setCurrentValue(total); // Assuming currentValue starts as allocatedAmount (may be calculated
-                                               // differently)
+            investment.setCurrentValue(total); // Initial value
             logger.info("Set currentValue: {}", total);
-
-            investment.setType(InvestmentType.manual); // Assuming this is the default, or you can change it to AUTO if
-                                                       // needed
-            logger.info("Set type: {}", InvestmentType.manual);
-
-            investment.setStrategy(Investment.InvestmentStrategy.aggressive); // Assuming strategy starts as "value" or
-                                                                              // you may want to set it
-            // dynamically
+            investment.setType(InvestmentType.manual);
+            logger.info("Set type: {}", Investment.InvestmentType.manual);
+            investment.setStrategy(Investment.InvestmentStrategy.aggressive);
             logger.info("Set strategy: {}", Investment.InvestmentStrategy.aggressive);
-
-            // Log the newly created investment with all fields set
             logger.info("Created new investment: {}", investment);
         }
 
         logger.info("def");
 
-        // saveInvestment(investment);
+        // Update current value based on latest market data
+        updateInvestmentCurrentValue(investment);
+
         investment = investmentRepository.saveAndFlush(investment);
 
         logger.info("123");
@@ -112,15 +98,11 @@ public class InvestmentService {
         saveTransaction(transaction);
 
         logger.info("789");
-        try {
-        } catch (Exception e) {
-            logger.error("Transaction failed, marking rollback", e);
-            throw new RuntimeException("Error processing investment transaction", e);
-        }
     }
 
     @Transactional
-    public void sellAsset(UUID userId, String symbol, BigDecimal quantity, BigDecimal price) {
+    public void sellAsset(UUID userId, String symbol, BigDecimal quantity) {
+        BigDecimal price = marketDataService.getCurrentStockPrice(symbol);
         BigDecimal total = quantity.multiply(price);
         Optional<Investment> existingInvestment = getInvestmentByUserIdSymbolStatus(userId, symbol,
                 InvestmentStatus.active);
@@ -144,6 +126,9 @@ public class InvestmentService {
                 investment.setStatus(InvestmentStatus.closed);
             }
 
+            // Update current value based on latest market data
+            updateInvestmentCurrentValue(investment);
+
             investment = investmentRepository.saveAndFlush(investment);
 
             Transactions transaction = new Transactions();
@@ -159,39 +144,41 @@ public class InvestmentService {
         }
     }
 
-    public Investment saveInvestment(Investment investment) {
-
+    @Transactional
+    public Investment updateInvestmentCurrentValue(Investment investment) {
         try {
-            // Log the investment details being saved
-            logger.debug("Saving investment details: {}", investment);
+            BigDecimal currentPrice = marketDataService.getCurrentStockPrice(investment.getSymbol());
+            BigDecimal newCurrentValue = investment.getCurrentQuantity().multiply(currentPrice);
+            investment.setCurrentValue(newCurrentValue);
+            logger.info("Updated currentValue for {} to {}", investment.getSymbol(), newCurrentValue);
+            return investment;
+        } catch (Exception e) {
+            logger.error("Failed to update current value for symbol: {}", investment.getSymbol(), e);
+            throw new RuntimeException("Error fetching market data", e);
+        }
+    }
 
-            // Perform the save operation
+    public Investment saveInvestment(Investment investment) {
+        try {
+            logger.debug("Saving investment details: {}", investment);
             return investmentRepository.saveAndFlush(investment);
-            // Log successful saving
         } catch (OptimisticLockingFailureException e) {
-            // Log error in case of optimistic locking failure
             logger.error(
                     "Saving investment failed due to Optimistic Locking Failure: Investment ID = {}. Entity has been modified by another transaction.",
                     investment.getInvestmentId(), e);
-
-            // Optionally, retry or handle the exception as needed
             throw new RuntimeException("Conflict detected. Please retry.", e);
         } catch (Exception e) {
-            // Catch other potential exceptions and log them
             logger.error("Unexpected error while saving investment: Investment ID = {}", investment.getInvestmentId(),
                     e);
             throw new RuntimeException("Error while saving investment.", e);
         }
-
-        // Final log after the save attempt (success or failure)
     }
 
     public void saveTransaction(Transactions transaction) {
-        logger.info("Saving transaction: " + transaction);
+        logger.info("Saving transaction: {}", transaction);
         try {
             transactionsRepository.save(transaction);
         } catch (OptimisticLockingFailureException e) {
-            // Handle the conflict (e.g., reload the entity or notify the user)
             logger.error(
                     "Save Transaction: Optimistic Locking Failure: Entity has been modified by another transaction", e);
         }
@@ -204,7 +191,13 @@ public class InvestmentService {
     }
 
     public Object getUserInvestments(UUID userId) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getUserInvestments'");
+    }
+
+    // Optional: Method to update all investments periodically
+    @Transactional
+    public void updateAllInvestments() {
+        investmentRepository.findAll().forEach(this::updateInvestmentCurrentValue);
+        investmentRepository.saveAll(investmentRepository.findAll());
     }
 }

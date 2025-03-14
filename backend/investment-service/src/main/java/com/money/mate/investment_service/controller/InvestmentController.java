@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-
 @RestController
 @RequestMapping("/api/investments")
 @RequiredArgsConstructor
@@ -24,8 +23,7 @@ public class InvestmentController {
     public ResponseEntity<String> buyInvestment(@RequestBody InvestmentRequestDto request) {
         logger.info("Received request to buy investment: {}", request);
         try {
-            investmentService.buyAsset(request.getUserId(), request.getSymbol(), request.getQuantity(),
-                    request.getPrice());
+            investmentService.buyAsset(request.getUserId(), request.getSymbol(), request.getQuantity());
             logger.info("Investment bought successfully for user: {}", request.getUserId());
             return ResponseEntity.ok("Investment bought successfully.");
         } catch (IllegalArgumentException e) {
@@ -42,8 +40,7 @@ public class InvestmentController {
     public ResponseEntity<String> sellInvestment(@RequestBody InvestmentRequestDto request) {
         logger.info("Received request to sell investment: {}", request);
         try {
-            investmentService.sellAsset(request.getUserId(), request.getSymbol(), request.getQuantity(),
-                    request.getPrice());
+            investmentService.sellAsset(request.getUserId(), request.getSymbol(), request.getQuantity());
             logger.info("Investment sold successfully for user: {}", request.getUserId());
             return ResponseEntity.ok("Investment sold successfully.");
         } catch (IllegalArgumentException e) {
