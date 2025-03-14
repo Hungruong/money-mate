@@ -18,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -120,7 +119,7 @@ public class InvestmentService {
         }
     }
 
-    @Transactional(noRollbackFor = Exception.class)
+    @Transactional
     public void sellAsset(UUID userId, String symbol, BigDecimal quantity, BigDecimal price) {
         BigDecimal total = quantity.multiply(price);
         Optional<Investment> existingInvestment = getInvestmentByUserIdSymbolStatus(userId, symbol,
@@ -135,17 +134,19 @@ public class InvestmentService {
             }
 
             investment.setTotalSoldQuantity(investment.getTotalSoldQuantity().add(quantity));
+            logger.info("Set totalSoldQuantity: {}", investment.getTotalSoldQuantity());
             investment.setCurrentQuantity(investment.getCurrentQuantity().subtract(quantity));
+            logger.info("Set currentQuantity: {}", investment.getCurrentQuantity());
             investment.setAllocatedCapital(investment.getAllocatedCapital().subtract(total));
+            logger.info("Set allocatedCapital: {}", investment.getAllocatedCapital());
 
             if (investment.getCurrentQuantity().compareTo(BigDecimal.ZERO) == 0) {
                 investment.setStatus(InvestmentStatus.closed);
             }
 
-            investmentRepository.save(investment);
+            investment = investmentRepository.saveAndFlush(investment);
 
             Transactions transaction = new Transactions();
-            transaction.setTransactionId(userId);
             transaction.setInvestment(investment);
             transaction.setType(TransactionType.sell);
             transaction.setQuantity(quantity);
