@@ -30,3 +30,4 @@ public class SavingContribution {
     @Column(nullable = false, updatable = false)
     private Date contributionDate = new Date();
 }
+ 

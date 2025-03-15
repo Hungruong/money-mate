@@ -6,7 +6,17 @@ import { GroupSavingStackParamList } from "../../navigation/GroupSavingNavigator
 
 // Type navigation prop
 type GroupSavingScreenNavigationProp = StackNavigationProp<GroupSavingStackParamList, 'GroupSavingHome'>;
-
+export interface SavingPlan {
+  planId: string;
+  planType: string; // Individual or Group
+  userId: string;
+  name: string;
+  targetAmount: number;
+  currentAmount: number;
+  startDate: string; // ISO date string
+  endDate: string; // ISO date string
+  createdAt: string; // ISO date string
+}
 export default function GroupSavingScreen() {
   const navigation = useNavigation<GroupSavingScreenNavigationProp>(); // Correct navigation
 
