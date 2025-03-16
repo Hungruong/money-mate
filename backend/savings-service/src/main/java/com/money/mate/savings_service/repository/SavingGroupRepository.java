@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 @Repository
-public interface SavingPlanRepository extends JpaRepository<SavingPlan, UUID> {
+public interface SavingGroupRepository extends JpaRepository<SavingPlan, UUID> {
 }
