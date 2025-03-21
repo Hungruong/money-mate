@@ -22,4 +22,6 @@ public interface InvestmentRepository extends JpaRepository<Investment, UUID> {
             InvestmentType auto);
 
     List<Investment> findByUserIdAndType(UUID userId, InvestmentType auto);
+
+    List<Investment> findByStatusAndType(InvestmentStatus active, InvestmentType auto);
 }
