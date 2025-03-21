@@ -42,16 +42,16 @@ const TradingScreen = () => {
       
       {/* Bottom Buttons */}
       <View style={{ position: "absolute", bottom: 0, left: 0, right: 0, flexDirection: "row", justifyContent: "space-around", backgroundColor: "white", paddingVertical: 4, shadowColor: "black", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4 }}>
-        <TouchableOpacity style={{ padding: 12, backgroundColor: "#F08080", borderRadius: 8 }} onPress={() => navigation.navigate("Portfolio")}> 
+        <TouchableOpacity style={{ padding: 12, backgroundColor: "#f5d0fe", borderRadius: 8 }} onPress={() => navigation.navigate("Portfolio")}> 
           <Text style={{ color: "white" }}>User Portfolio</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={{ padding: 12, backgroundColor: "#F08080", borderRadius: 8 }} onPress={() => navigation.navigate("TransactionHistory")}> 
+        <TouchableOpacity style={{ padding: 12, backgroundColor: "#f5d0fe", borderRadius: 8 }} onPress={() => navigation.navigate("TransactionHistory")}> 
           <Text style={{ color: "white" }}>View Transactions</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={{ padding: 12, backgroundColor: "#F08080", borderRadius: 8 }} onPress={() => navigation.navigate("AutoTrade")}> 
+        <TouchableOpacity style={{ padding: 12, backgroundColor: "#f5d0fe", borderRadius: 8 }} onPress={() => navigation.navigate("AutoTrade")}> 
           <Text style={{ color: "white" }}>Auto Trade</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={{ padding: 12, backgroundColor: "#F08080", borderRadius: 8 }} onPress={() => navigation.navigate("ManualTrade")}> 
+        <TouchableOpacity style={{ padding: 12, backgroundColor: "#f5d0fe", borderRadius: 8 }} onPress={() => navigation.navigate("ManualTrade")}> 
           <Text style={{ color: "white" }}>Manual Trade</Text>
         </TouchableOpacity>
       </View>

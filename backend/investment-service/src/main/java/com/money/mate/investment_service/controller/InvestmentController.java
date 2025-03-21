@@ -1,6 +1,8 @@
 package com.money.mate.investment_service.controller;
 
 import com.money.mate.investment_service.service.InvestmentService;
+import com.money.mate.investment_service.service.MarketDataService;
+
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,15 +10,30 @@ import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/investments")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class InvestmentController {
 
     private static final Logger logger = LoggerFactory.getLogger(InvestmentController.class);
     private final InvestmentService investmentService;
+    private final MarketDataService marketDataService; // Add this
+
+    @GetMapping("/price/{symbol}")
+    public ResponseEntity<BigDecimal> getPrice(@PathVariable String symbol) {
+        logger.info("Fetching price for symbol: {}", symbol);
+        try {
+            BigDecimal price = marketDataService.getCurrentStockPrice(symbol); // Use injected service
+            return ResponseEntity.ok(price);
+        } catch (Exception e) {
+            logger.error("Error fetching price for symbol: {}", symbol, e);
+            return ResponseEntity.status(500).body(null);
+        }
+    }
 
     // Endpoint to buy an asset
     @PostMapping("/buy")
