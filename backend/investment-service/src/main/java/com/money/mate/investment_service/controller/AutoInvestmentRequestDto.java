@@ -11,7 +11,4 @@ public class AutoInvestmentRequestDto {
     private String strategy;
     private BigDecimal amount;
 
-    // Optional: You might want additional fields specific to auto-trading
-    // private String frequency; // e.g., "DAILY", "WEEKLY"
-    // private LocalDateTime startDate;
 }
