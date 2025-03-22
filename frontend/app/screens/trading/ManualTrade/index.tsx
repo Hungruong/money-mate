@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 
-const ManualTrade = ({ navigation }) => {
+const ManualTrade = ({ navigation }: any) => {
   const [symbol, setSymbol] = useState("");
   const [quantity, setQuantity] = useState("");
   const [action, setAction] = useState("Buy");
   const [userId] = useState("a2b0d0ab-951d-437f-81f7-c228e1d727f2"); // Mock UUID, replace with auth
 
-  const handleQuantityChange = (value) => {
+  const handleQuantityChange = (value: string) => {
     if (value === "" || (Number(value) >= 1 && !isNaN(Number(value)))) {
       setQuantity(value);
     }

@@ -5,10 +5,16 @@ import axios from "axios";
 // Use your machine's IP if testing on emulator/physical device
 const BASE_URL = "http://localhost:8086"; // Try "http://192.168.1.x:8086" if localhost fails
 
-const ConfirmOrder = ({ navigation, route }) => {
+import { NavigationProp, RouteProp } from "@react-navigation/native";
+
+type ConfirmOrderProps = {
+  navigation: NavigationProp<any>;
+  route: RouteProp<any>;
+};
+
+const ConfirmOrder: React.FC<ConfirmOrderProps> = ({ navigation, route }) => {
   const { symbol, quantity, action, userId } = route.params || {};
   const [price, setPrice] = useState<number | null>(null);
-  const [availableFunds] = useState(5000); // Mock value
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,7 +27,7 @@ const ConfirmOrder = ({ navigation, route }) => {
         console.log("Response data:", response.data);
         setPrice(Number(response.data)); // Ensure it’s a number
         setLoading(false);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error fetching price:", error.message);
         if (error.response) {
           console.error("Response error data:", error.response.data);
@@ -85,7 +91,6 @@ const ConfirmOrder = ({ navigation, route }) => {
         <Text><Text style={styles.bold}>Amount:</Text> {quantity} shares</Text>
         <Text><Text style={styles.bold}>Price per Share:</Text> ${price?.toFixed(2) || "N/A"}</Text>
         <Text><Text style={styles.bold}>Total Price:</Text> ${totalPrice.toFixed(2)}</Text>
-        <Text><Text style={styles.bold}>Available Funds:</Text> ${availableFunds.toFixed(2)}</Text>
         <Text><Text style={styles.bold}>Action:</Text> {action}</Text>
       </View>
 
