@@ -1,40 +1,92 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from "react-native";
 
-// Sample data for portfolio (this would typically come from an API)
-const samplePortfolio = [
-  { symbol: "AAPL", quantity: 10, price: 150, currentPrice: 155 },
-  { symbol: "TSLA", quantity: 5, price: 700, currentPrice: 715 },
-  { symbol: "GOOG", quantity: 2, price: 2800, currentPrice: 2850 },
-];
-
 const Portfolio = () => {
-  const [portfolio, setPortfolio] = useState(samplePortfolio);
-  
-  // Calculate the total portfolio value
-  const totalValue = portfolio.reduce(
-    (acc, investment) => acc + investment.quantity * investment.currentPrice,
+  const [portfolio, setPortfolio] = useState<{
+    holdings: {
+      symbol: string;
+      currentQuantity: number;
+      totalBoughtQuantity: number;
+      totalSoldQuantity: number;
+      averagePrice: number;
+      status: string;
+    }[];
+    availableBalance: number;
+  }>({
+    holdings: [],
+    availableBalance: 0,
+  });
+  const hardcodedUserId = "a2b0d0ab-951d-437f-81f7-c228e1d727f2";
+
+  useEffect(() => {
+    const fetchPortfolio = async () => {
+      try {
+        const response = await fetch(`http://localhost:8086/api/investments/${hardcodedUserId}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log("Raw API Response:", data);
+
+        let holdingsData = [];
+        if (Array.isArray(data)) {
+          holdingsData = data;
+        } else if (data && Array.isArray(data.holdings)) {
+          holdingsData = data.holdings;
+        }
+
+        setPortfolio({
+          holdings: holdingsData.map((item: any) => ({
+            symbol: item.symbol || "N/A",
+            currentQuantity: item.current_quantity || item.currentQuantity || 0,
+            totalBoughtQuantity: item.total_bought_quantity || item.totalBoughtQuantity || 0,
+            totalSoldQuantity: item.total_sold_quantity || item.totalSoldQuantity || 0,
+            averagePrice: item.average_price || item.averagePrice || 0,
+            status: item.status || "Unknown",
+          })),
+          availableBalance: data?.available_balance || data?.availableBalance || 0,
+        });
+      } catch (error) {
+        console.error("Error fetching portfolio:", error);
+        setPortfolio({
+          holdings: [],
+          availableBalance: 0,
+        });
+      }
+    };
+
+    fetchPortfolio();
+  }, []);
+
+  const totalHoldingsValue = portfolio.holdings.reduce(
+    (acc, holding) => acc + Number(holding.currentQuantity) * Number(holding.averagePrice),
     0
   );
+  const totalPortfolioValue = totalHoldingsValue + portfolio.availableBalance;
 
-  // Portfolio item component
-  const PortfolioItem = ({ symbol, quantity, price, currentPrice }) => {
-    const profitLoss = (currentPrice - price) * quantity;
-
+  const PortfolioItem = ({
+    symbol,
+    currentQuantity,
+    totalBoughtQuantity,
+    totalSoldQuantity,
+    averagePrice,
+    status,
+  }: {
+    symbol: string;
+    currentQuantity: number;
+    totalBoughtQuantity: number;
+    totalSoldQuantity: number;
+    averagePrice: number;
+    status: string;
+  }) => {
     return (
       <View style={styles.itemContainer}>
-        <Text style={styles.itemText}>Symbol: {symbol}</Text>
-        <Text style={styles.itemText}>Quantity: {quantity}</Text>
-        <Text style={styles.itemText}>Purchase Price: ${price}</Text>
-        <Text style={styles.itemText}>Current Price: ${currentPrice}</Text>
-        <Text
-          style={[
-            styles.itemText,
-            { color: profitLoss >= 0 ? "green" : "red" },
-          ]}
-        >
-          {profitLoss >= 0 ? "Profit" : "Loss"}: ${profitLoss.toFixed(2)}
-        </Text>
+        <Text style={styles.itemText}>Stock Symbol: {symbol}</Text> {/* Changed from "Symbol" to "Stock Symbol" */}
+        <Text style={styles.itemText}>Current Quantity: {Number(currentQuantity).toFixed(4)}</Text>
+        <Text style={styles.itemText}>Total Bought: {Number(totalBoughtQuantity).toFixed(4)}</Text>
+        <Text style={styles.itemText}>Total Sold: {Number(totalSoldQuantity).toFixed(4)}</Text>
+        <Text style={styles.itemText}>Avg. Price: ${Number(averagePrice).toFixed(2)}</Text>
+        <Text style={styles.itemText}>Status: {status}</Text>
       </View>
     );
   };
@@ -42,31 +94,31 @@ const Portfolio = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>User Portfolio</Text>
-      <Text style={styles.content}>Here you can manage your stock portfolio.</Text>
-
-      {/* Portfolio Summary */}
+      <Text style={styles.content}>Track your stock investments</Text>
       <View style={styles.summaryContainer}>
-        <Text style={styles.totalValue}>Total Portfolio Value: ${totalValue.toFixed(2)}</Text>
+        <Text style={styles.totalValue}>Total Holdings Value: ${totalHoldingsValue.toFixed(2)}</Text>
+        <Text style={styles.totalValue}>Available Balance: ${portfolio.availableBalance.toFixed(2)}</Text>
+        <Text style={styles.totalValue}>Total Portfolio Value: ${totalPortfolioValue.toFixed(2)}</Text>
       </View>
-
-      {/* List of investments */}
-      <FlatList
-        data={portfolio}
-        renderItem={({ item }) => (
-          <PortfolioItem
-            symbol={item.symbol}
-            quantity={item.quantity}
-            price={item.price}
-            currentPrice={item.currentPrice}
-          />
-        )}
-        keyExtractor={(item) => item.symbol + item.quantity}
-      />
-
-      {/* Add more investments button (this could navigate to another page) */}
-      <TouchableOpacity style={styles.addButton} onPress={() => alert("Navigate to add investment page")}>
-        <Text style={styles.addButtonText}>+ Add Investment</Text>
-      </TouchableOpacity>
+      {portfolio.holdings.length > 0 ? (
+        <FlatList
+          data={portfolio.holdings}
+          renderItem={({ item }) => (
+            <PortfolioItem
+              symbol={item.symbol}
+              currentQuantity={item.currentQuantity}
+              totalBoughtQuantity={item.totalBoughtQuantity}
+              totalSoldQuantity={item.totalSoldQuantity}
+              averagePrice={item.averagePrice}
+              status={item.status}
+            />
+          )}
+          keyExtractor={(item) => `${item.symbol}-${item.currentQuantity}`}
+        />
+      ) : (
+        <Text style={styles.noDataText}>No investments available.</Text>
+      )}
+      
     </View>
   );
 };
@@ -100,6 +152,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#333",
+    marginBottom: 5,
   },
   itemContainer: {
     backgroundColor: "#fff",
@@ -123,6 +176,12 @@ const styles = StyleSheet.create({
   addButtonText: {
     fontSize: 18,
     color: "#fff",
+  },
+  noDataText: {
+    fontSize: 16,
+    color: "#666",
+    textAlign: "center",
+    marginTop: 20,
   },
 });
 

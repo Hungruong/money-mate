@@ -195,8 +195,11 @@ public class InvestmentService {
         return investmentRepository.findByUserIdAndSymbolAndStatus(userId, symbol, status);
     }
 
-    public Object getUserInvestments(UUID userId) {
-        throw new UnsupportedOperationException("Unimplemented method 'getUserInvestments'");
+    public List<Investment> getUserInvestments(UUID userId) {
+        logger.info("Fetching investments for userId: {}", userId);
+        List<Investment> investments = investmentRepository.findByUserId(userId);
+        logger.info("Found {} investments for userId: {}", investments.size(), userId);
+        return investments;
     }
 
     // Optional: Method to update all investments periodically

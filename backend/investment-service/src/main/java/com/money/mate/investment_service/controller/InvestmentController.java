@@ -1,5 +1,6 @@
 package com.money.mate.investment_service.controller;
 
+import com.money.mate.investment_service.entity.Investment;
 import com.money.mate.investment_service.service.InvestmentService;
 import com.money.mate.investment_service.service.MarketDataService;
 
@@ -11,12 +12,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/investments")
+@CrossOrigin(origins = "http://localhost:8081")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class InvestmentController {
 
     private static final Logger logger = LoggerFactory.getLogger(InvestmentController.class);
@@ -68,15 +70,14 @@ public class InvestmentController {
 
     // Get user investments
     @GetMapping("/{userId}")
-    public ResponseEntity<Object> getUserInvestments(@PathVariable UUID userId) {
+    public ResponseEntity<List<Investment>> getUserInvestments(@PathVariable UUID userId) {
         logger.info("Fetching investments for user: {}", userId);
         try {
-            var investments = investmentService.getUserInvestments(userId);
+            List<Investment> investments = investmentService.getUserInvestments(userId);
             logger.info("Successfully fetched investments for user: {}", userId);
             return ResponseEntity.ok(investments);
         } catch (Exception e) {
             logger.error("Error fetching investments for user: {}", userId, e);
-            return ResponseEntity.status(500).body("Error fetching investments.");
-        }
+            return ResponseEntity.status(500).body(null);}
     }
 }
