@@ -6,8 +6,9 @@ import com.money.mate.investment_service.entity.Investment.InvestmentStatus;
 import com.money.mate.investment_service.entity.Investment.InvestmentType;
 import com.money.mate.investment_service.entity.Transactions;
 import com.money.mate.investment_service.entity.Transactions.TransactionType;
+import java.util.List;
 import com.money.mate.investment_service.repository.InvestmentRepository;
-import com.money.mate.investment_service.repository.TransactionsRepository;
+import com.money.mate.investment_service.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,10 +30,14 @@ public class InvestmentService {
     private final InvestmentRepository investmentRepository;
 
     @Autowired
-    private final TransactionsRepository transactionsRepository;
+    private final TransactionRepository transactionsRepository;
 
     @Autowired
     private final MarketDataService marketDataService; // Add MarketDataService dependency
+
+    public List<Transactions> getTransactionsByUserId(UUID userId) {
+        return transactionsRepository.findByUserId(userId);
+    }
 
     @Transactional
     public void buyAsset(UUID userId, String symbol, BigDecimal quantity) {

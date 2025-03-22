@@ -1,47 +1,42 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, StyleSheet } from "react-native";
 
-// Sample transaction data
-const sampleTransactions = [
-  {
-    id: '1',
-    date: '2025-02-20',
-    quantity: 5,
-    purchasePrice: 10.00,
-    amount: -50.75,
-    purchaseType: 'buy',
-    tickerSymbol: 'AAPL',
-  },
-  {
-    id: '2',
-    date: '2025-02-21',
-    quantity: 3,
-    purchasePrice: 500.00,
-    amount: 1500.00,
-    purchaseType: 'sell',
-    tickerSymbol: 'GOOG',
-  },
-  {
-    id: '3',
-    date: '2025-02-22',
-    quantity: 2,
-    purchasePrice: 60.00,
-    amount: -120.00,
-    purchaseType: 'buy',
-    tickerSymbol: 'TSLA',
-  },
-  // Add more transactions as needed
-];
-
 const TransactionHistory = () => {
   const [transactions, setTransactions] = useState([]);
+  const hardcodedUserId = "27431f9a-3b99-426f-909e-5301102b115d";
 
   useEffect(() => {
-    // Set the sample transactions as the state
-    setTransactions(sampleTransactions);
+    const fetchTransactions = async () => {
+      try {
+        const response = await fetch(`http://localhost:8086/api/transactions/user/${hardcodedUserId}`);
+        console.info("Response Status:", response.status); // Log HTTP status
+        const data = await response.json();
+        console.info("Raw Data:", data); // Log raw response data
+
+        const formattedTransactions = data.map((transaction: any) => {
+          console.info("Mapping Transaction:", transaction); // Log each transaction being mapped
+          return {
+            id: transaction.transactionId,
+            date: new Date(transaction.timestamp).toLocaleDateString(),
+            tickerSymbol: transaction.investment?.symbol || "N/A",
+            quantity: transaction.quantity,
+            purchasePrice: transaction.price,
+            amount: transaction.totalAmount * (transaction.type === "sell" ? -1 : 1),
+            purchaseType: transaction.type,
+          };
+        });
+
+        console.info("Formatted Transactions:", formattedTransactions); // Log formatted data
+        setTransactions(formattedTransactions);
+      } catch (error) {
+        console.error("Error fetching transactions:", error); // Log errors
+      }
+    };
+
+    fetchTransactions();
   }, []);
 
-  const renderItem = ({ item }) => (
+  const renderItem = ({ item }: { item: any }) => (
     <View style={styles.transactionItem}>
       <View style={styles.transactionDetails}>
         <Text style={styles.date}>{item.date}</Text>
@@ -81,6 +76,7 @@ const TransactionHistory = () => {
   );
 };
 
+// Styles remain unchanged
 const styles = StyleSheet.create({
   container: {
     flex: 1,

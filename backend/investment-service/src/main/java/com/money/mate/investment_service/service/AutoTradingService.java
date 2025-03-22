@@ -7,7 +7,7 @@ import com.money.mate.investment_service.entity.Investment.InvestmentType;
 import com.money.mate.investment_service.entity.Transactions;
 import com.money.mate.investment_service.entity.Transactions.TransactionType;
 import com.money.mate.investment_service.repository.InvestmentRepository;
-import com.money.mate.investment_service.repository.TransactionsRepository;
+import com.money.mate.investment_service.repository.TransactionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ public class AutoTradingService {
     @Autowired
     private InvestmentRepository investmentRepository;
     @Autowired
-    private TransactionsRepository transactionsRepository;
+    private TransactionRepository transactionsRepository;
     @Autowired
     private MarketDataService marketDataService;
     @Autowired(required = false)
