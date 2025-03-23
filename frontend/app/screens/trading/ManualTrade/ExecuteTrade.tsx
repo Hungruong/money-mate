@@ -1,10 +1,17 @@
-import React from "react";
+import React, { FC } from "react";
 import { View, Text, Button, StyleSheet } from "react-native";
 import axios from "axios";
 
 const BASE_URL = "http://localhost:8086"; // Replace with your machine’s IP
 
-const ExecuteTrade = ({ navigation, route }) => {
+import { NavigationProp, RouteProp } from "@react-navigation/native";
+
+type ConfirmOrderProps = {
+  navigation: NavigationProp<any>;
+  route: RouteProp<any>;
+};
+
+const ExecuteTrade: FC<ConfirmOrderProps> = ({ navigation, route })=> {
   const { symbol, quantity, price, action, userId } = route.params || {};
   const totalPrice = Number(quantity) * Number(price);
 

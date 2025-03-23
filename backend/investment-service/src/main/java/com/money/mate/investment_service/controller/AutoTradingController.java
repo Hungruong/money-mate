@@ -3,19 +3,43 @@ package com.money.mate.investment_service.controller;
 import com.money.mate.investment_service.entity.Investment;
 import com.money.mate.investment_service.entity.Investment.InvestmentStrategy;
 import com.money.mate.investment_service.service.AutoTradingService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/autotrading")
 public class AutoTradingController {
 
+    private static final Logger logger = LoggerFactory.getLogger(AutoTradingController.class);
+
     @Autowired
     private AutoTradingService autoTradingService;
+
+    @GetMapping("/investments/{userId}")
+    public ResponseEntity<List<Investment>> getUserInvestments(@PathVariable UUID userId) {
+        logger.info("Fetching investments for userId: {}", userId);
+        try {
+            List<Investment> investments = autoTradingService.getInvestmentsByUserId(userId);
+            if (investments.isEmpty()) {
+                logger.info("No investments found for userId: {}", userId);
+            } else {
+                logger.info("Found {} investments for userId: {}", investments.size(), userId);
+            }
+            return ResponseEntity.ok(investments);
+        } catch (Exception e) {
+            logger.error("Failed to fetch investments for userId: {}", userId, e);
+            return ResponseEntity.status(500).body(null);
+        }
+    }
 
     @PostMapping("/start")
     public ResponseEntity<Investment> startStrategy(@RequestBody AutoInvestmentRequestDto request) {

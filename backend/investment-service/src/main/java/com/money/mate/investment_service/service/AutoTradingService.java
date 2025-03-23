@@ -42,6 +42,7 @@ public class AutoTradingService {
 
     @Transactional
     public Investment startStrategy(UUID userId, InvestmentStrategy strategy, BigDecimal allocatedAmount) {
+        logger.info("Starting strategy for userId: {}, strategy: {}, amount: {}", userId, strategy, allocatedAmount);
         List<Investment> existingInvestments = investmentRepository.findByUserIdAndType(userId, InvestmentType.auto);
         if (existingInvestments.stream().anyMatch(inv -> inv.getStatus() == InvestmentStatus.active)) {
             throw new IllegalStateException("User already has an active auto-trading strategy.");
@@ -364,5 +365,11 @@ public class AutoTradingService {
     private record Thresholds(BigDecimal profitThresholdMin, BigDecimal profitThresholdMax,
             BigDecimal lossThresholdMin, BigDecimal lossThresholdMax,
             BigDecimal targetReturn) {
+    }
+
+    public List<Investment> getInvestmentsByUserId(UUID userId) {
+        logger.info("Retrieving investments for userId: {}", userId);
+        List<Investment> investments = investmentRepository.findByUserId(userId);
+        return investments;
     }
 }

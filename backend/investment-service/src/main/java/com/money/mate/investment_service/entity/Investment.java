@@ -26,10 +26,10 @@ public class Investment {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID investmentId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 36)
     private UUID userId; // User who owns the investment
 
-    @Column(nullable = false, length = 10)
+    @Column(nullable = false, length = 20)
     private String symbol; // Stock symbol
 
     @Column(nullable = false, precision = 12, scale = 2)
@@ -54,15 +54,15 @@ public class Investment {
     private BigDecimal currentValue; // Current value of the investment
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "type", nullable = false, length = 10)
+    @Column(name = "type", nullable = false, length = 20)
     private InvestmentType type; // manual or auto
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "strategy", nullable = false, length = 10)
+    @Column(name = "strategy", nullable = false, length = 20)
     private InvestmentStrategy strategy; // value or growth
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 10)
+    @Column(name = "status", nullable = false, length = 20)
     private InvestmentStatus status; // active or inactive
 
     @Column(name = "created_at", nullable = false, updatable = false)
