@@ -125,8 +125,10 @@ export default function GroupHome() {
             <Text style={styles.text}>
                 Delete Group
             </Text>
+
         </TouchableOpacity>
         <TouchableOpacity style={[styles.button,{alignSelf:"center"}]}onPress={() => navigation.navigate('SetGoal')} >
+         
             <Text style={styles.text}>
                 Set Goal
             </Text>
