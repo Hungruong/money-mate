@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { SavingPlan } from '../types';
 
-const API_URL = 'http://localhost:8080/api/saving-plans';
+const API_URL = 'http://localhost:8084/api/saving-plans';
 
 export const getSavingPlans = async (): Promise<SavingPlan[]> => {
     const response = await axios.get<SavingPlan[]>(API_URL);
