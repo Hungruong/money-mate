@@ -128,7 +128,6 @@ export default function GroupHome() {
 
         </TouchableOpacity>
         <TouchableOpacity style={[styles.button,{alignSelf:"center"}]}onPress={() => navigation.navigate('SetGoal')} >
-         
             <Text style={styles.text}>
                 Set Goal
             </Text>

@@ -18,6 +18,7 @@ import com.money.mate.savings_service.entity.SavingGoal;
 import com.money.mate.savings_service.service.SavingGoalService;
 
 @RestController
+//@CrossOrigin(origins = "http://localhost:8081") 
 @RequestMapping("/api/saving-goals")
 public class SavingGoalController {
 
