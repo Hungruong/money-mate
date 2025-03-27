@@ -68,7 +68,7 @@ export default function SavingPlanCreate() {
     if (!['Individual', 'Group'].includes(data.planType)) {
       errors.push('Plan type must be either Individual or Group');
     }
-
+  
     if (typeof data.name !== 'string' || data.name.trim() === '') {
       errors.push('Plan name is required');
     }

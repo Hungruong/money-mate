@@ -13,8 +13,10 @@ import {GroupDelete} from '../screens/GroupSaving/groupModify';
 import {SetGoal} from '../screens/GroupSaving/groupModify';
 export type GroupSavingStackParamList = {
   GroupSavingHome: undefined;
+  PlanDetails:{planId:string};
+  PlanCreate:undefined
   GroupCreate: undefined;
-  GroupHome:undefined;
+  GroupHome:{planId:string};
   GroupMemProfile:undefined;
   GroupMemberRemove:undefined;
   SetRule:undefined;

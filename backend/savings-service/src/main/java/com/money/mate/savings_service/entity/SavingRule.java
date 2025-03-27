@@ -28,6 +28,6 @@ public class SavingRule {
     private UUID planId;
 
     @Column(nullable=false)
-    private UUID descriptionp;
+    private UUID description;
     
 }

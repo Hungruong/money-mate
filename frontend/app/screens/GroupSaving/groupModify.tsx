@@ -8,7 +8,7 @@ import { Button } from "react-native";
 //import { navigate } from "expo-router/build/global-state/routing";
 type GroupSavingScreenNavigationProp = StackNavigationProp<GroupSavingStackParamList, 'GroupSavingHome'>;
 //const navigate = useNavigation();
-interface GoalData {
+interface RuleData {
   planId:string,
   title: string;
   amount: number;
@@ -63,13 +63,136 @@ export function GroupMemberRemove() {
         </View>
     );
 }
-export function SetRule() {
+export function SetRuleOld() {
     const navigation = useNavigation<GroupSavingScreenNavigationProp>();
     return(
         <Text>Set Rule</Text>
     );
 }
+export function SetRule() {
+  const navigation = useNavigation<GroupSavingScreenNavigationProp>();
+  const [RuleData, setRuleData] = useState<RuleData>({
+    planId: "123e4567-e89b-12d3-a456-426614174000",
+    ruleDescription: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
+  const handleInputChange = (name: keyof RuleData, value: string | number) => {
+    console.log(`Updating ${name} with value:`, value); // Debugging input changes
+  
+    setRuleData(prev => ({
+      ...prev,
+      [name]: name === 'amount' 
+        ? parseFloat(value.toString()) || 0  // Ensure it's converted properly
+        : value
+    }));
+  };
+  const validateRuleData = (data: RuleData) => {
+    const errors: string[] = [];
+  
+    if (typeof data.planId !== 'string') {
+      errors.push(`Invalid type for planId: expected string, got ${typeof data.planId}`);
+    }
+    if (typeof data.ruleDescription !== 'string') {
+      errors.push(`Invalid type for ruleDescription: expected string, got ${typeof data.ruleDescription}`);
+    }
+  
+    if (errors.length > 0) {
+      console.log("Validation Errors:", errors);
+    } else {
+      console.log("All types are correct:", data);
+    }
+  };
+  
+  
+  
+
+  const handleSubmit = async () => {
+    //e.preventDefault();
+    validateRuleData(RuleData);
+    console.log("Submitting Goal Data:", RuleData); 
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      console.log("Pass")
+      const response = await fetch(`${GOAL_URL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(RuleData),
+        credentials: 'include'
+        
+      });
+      
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+      console.log("Pass")
+
+      const result = await response.json();
+      //navigate('/goals');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create goal');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.modalContainer}>
+        <Text style={styles.modalText}>Create New Rules</Text>
+        
+        {error && <Text style={styles.errorText}>{error}</Text>}
+        
+        <ScrollView style={styles.formContainer}>
+        
+
+          
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Description</Text>
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              value={RuleData.ruleDescription}
+              onChangeText={(text) => handleInputChange('ruleDescription', text)}
+              placeholder="Enter description"
+              multiline
+              numberOfLines={4}
+            />
+          </View>
+          
+         
+          
+        </ScrollView>
+        
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity 
+            style={[styles.button, styles.cancelButton]}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.buttonText}>Cancel</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            
+            style={[styles.button, styles.confirmButton]}
+            
+            onPress={handleSubmit}
+            disabled={isSubmitting}
+          >
+            <Text style={styles.buttonText}>
+              {isSubmitting ? 'Creating...' : 'Create Rule'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  );
+}
 export function GroupDelete() {
     const navigation = useNavigation<GroupSavingScreenNavigationProp>();
     const [modalVisible, setModalVisible] = useState(false);
@@ -123,7 +246,7 @@ export function SetGoalOld() {
 
 export function SetGoal() {
   const navigation = useNavigation<GroupSavingScreenNavigationProp>();
-  const [goalData, setGoalData] = useState<GoalData>({
+  const [RuleData, setRuleData] = useState<RuleData>({
     planId: "123e4567-e89b-12d3-a456-426614174000",
     title: '',
     amount: 0,
@@ -133,17 +256,17 @@ export function SetGoal() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleInputChange = (name: keyof GoalData, value: string | number) => {
+  const handleInputChange = (name: keyof RuleData, value: string | number) => {
     console.log(`Updating ${name} with value:`, value); // Debugging input changes
   
-    setGoalData(prev => ({
+    setRuleData(prev => ({
       ...prev,
       [name]: name === 'amount' 
         ? parseFloat(value.toString()) || 0  // Ensure it's converted properly
         : value
     }));
   };
-  const validateGoalData = (data: GoalData) => {
+  const validateRuleData = (data: RuleData) => {
     const errors: string[] = [];
   
     if (typeof data.planId !== 'string') {
@@ -174,8 +297,8 @@ export function SetGoal() {
 
   const handleSubmit = async () => {
     //e.preventDefault();
-    validateGoalData(goalData);
-    console.log("Submitting Goal Data:", goalData); 
+    validateRuleData(RuleData);
+    console.log("Submitting Goal Data:", RuleData); 
     setIsSubmitting(true);
     setError(null);
 
@@ -186,7 +309,7 @@ export function SetGoal() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(goalData),
+        body: JSON.stringify(RuleData),
         credentials: 'include'
         
       });
@@ -218,7 +341,7 @@ export function SetGoal() {
             <Text style={styles.label}>Goal Title</Text>
             <TextInput
               style={styles.input}
-              value={goalData.title}
+              value={RuleData.title}
               onChangeText={(text) => handleInputChange('title', text)}
               placeholder="Enter goal title"
            
@@ -229,7 +352,7 @@ export function SetGoal() {
             <Text style={styles.label}>Description</Text>
             <TextInput
               style={[styles.input, styles.textArea]}
-              value={goalData.ruleDescription}
+              value={RuleData.ruleDescription}
               onChangeText={(text) => handleInputChange('ruleDescription', text)}
               placeholder="Enter description"
               multiline
@@ -241,7 +364,7 @@ export function SetGoal() {
             <Text style={styles.label}>Target Date</Text>
             <TextInput
               style={styles.input}
-              value={goalData.deadline}
+              value={RuleData.deadline}
               onChangeText={(text) => handleInputChange('deadline', text)}
               placeholder="YYYY-MM-DD"
              
@@ -252,7 +375,7 @@ export function SetGoal() {
             <Text style={styles.label}>Target Amount (optional)</Text>
             <TextInput
               style={styles.input}
-              value={goalData.amount.toString()}
+              value={RuleData.amount.toString()}
               onChangeText={(text) => handleInputChange('amount', text)}
               placeholder="0.00"
               keyboardType="decimal-pad"
