@@ -22,12 +22,12 @@ import lombok.Setter;
 public class SavingRule {
     @Id
     @GeneratedValue(strategy=GenerationType.UUID)
-    private UUID roleId;
+    private UUID ruleId;
 
     @Column(nullable=false)
     private UUID planId;
 
     @Column(nullable=false)
-    private UUID description;
+    private String description;
     
 }

@@ -119,6 +119,12 @@ export default function GroupSavingScreen() {
         >
           <Text style={styles.buttonText}>Create new saving plan</Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('GroupDelete')}
+        >
+          <Text style={styles.buttonText}>Delete current plan</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -199,6 +205,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#4CAF50',
     borderRadius: 8,
     alignItems: 'center',
+    marginTop:10,
   },
   buttonText: {
     color: 'white',

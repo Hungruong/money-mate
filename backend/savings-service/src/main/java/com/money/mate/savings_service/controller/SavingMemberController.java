@@ -1,12 +1,21 @@
 package com.money.mate.savings_service.controller;
 
-import com.money.mate.savings_service.entity.SavingMember;
-import com.money.mate.savings_service.service.SavingMemberService;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.UUID;
+import com.money.mate.savings_service.entity.SavingMember;
+import com.money.mate.savings_service.service.SavingMemberService;
 
 @RestController
 @RequestMapping("/api/saving-members")
@@ -32,4 +41,14 @@ public class SavingMemberController {
         savingMemberService.deleteMember(planId, userId);
         return ResponseEntity.ok("Member deleted successfully");
     }
+
+    @GetMapping("/user/{userId}")
+    public Optional<SavingMember> getMemberByUserId(@PathVariable UUID userId) {
+        return savingMemberService.findMemberByUserId(userId);
+    }
+    @GetMapping
+    public List<SavingMember> getMembers(@RequestParam UUID planId) {
+        return savingMemberService.getMembersByPlanId(planId);
+    }
+    
 }
