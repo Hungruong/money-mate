@@ -168,15 +168,23 @@ export function SetRule() {
 
 export function GroupDelete() {
     const navigation = useNavigation<GroupSavingScreenNavigationProp>();
+    const route = useRoute<GroupHomeScreenRouteProp>();
     const [modalVisible, setModalVisible] = useState(false);
+    const { planId } = route.params;
     useEffect(() => {
         setModalVisible(true); // Show modal immediately when the component mounts
       }, []);
-    const handleConfirm = () => {
-        console.log("Action Confirmed");
-        setModalVisible(false);
-        navigation.navigate("GroupSavingHome"); // Navigate back to the previous screen
-      };
+      const handleConfirm = async () => {
+        try {
+            await axios.delete(`http://localhost:8084/api/saving-groups/${planId}`);
+            console.log("Group deleted successfully");
+            setModalVisible(false);
+            navigation.navigate("GroupSavingHome");
+        } catch (error) {
+            console.error("Error deleting group:", error);
+            // You might want to show an error message to the user
+        }
+    };
     
     const handleCancel = () => {
         setModalVisible(false);
