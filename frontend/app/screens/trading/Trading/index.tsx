@@ -1,9 +1,39 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, FlatList, ActivityIndicator, Modal, StyleSheet } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, FlatList, ActivityIndicator, Modal, StyleSheet, Dimensions } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
+import { LineChart } from "react-native-chart-kit";
 
 const BACKEND_API_URL = "http://localhost:8086/api";
+
+// Hardcoded dashboard data for the graph (e.g., AAPL prices over 5 days)
+const HARDCODED_CHART_DATA = {
+  labels: ["Mar 25", "Mar 26", "Mar 27", "Mar 28", "Mar 29"],
+  datasets: [
+    {
+      data: [145.50, 147.20, 149.80, 148.90, 150.25], // AAPL prices
+      color: (opacity = 1) => `rgba(0, 255, 0, ${opacity})`, // Green line
+      strokeWidth: 2,
+    },
+  ],
+  legend: ["AAPL Price"],
+};
+
+const chartConfig = {
+  backgroundGradientFrom: "#fff",
+  backgroundGradientTo: "#fff",
+  decimalPlaces: 2,
+  color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`, // Black for labels
+  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+  style: {
+    borderRadius: 8,
+  },
+  propsForDots: {
+    r: "4",
+    strokeWidth: "1",
+    stroke: "#ffa726",
+  },
+};
 
 const TradingScreen = () => {
   const navigation = useNavigation();
@@ -43,12 +73,12 @@ const TradingScreen = () => {
           regularMarketPrice: stock.price ? stock.price.toString() : "N/A",
         }));
         setDashboardData(formattedData);
-        setModalVisible(true); // Show popup card
+        setModalVisible(true);
       } else {
         setDashboardData([]);
       }
     } catch (err) {
-      setError(err.message); // Show error in modal
+      setError(err.message);
       setDashboardData([]);
     } finally {
       setLoading(false);
@@ -70,13 +100,20 @@ const TradingScreen = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Dashboard Placeholder */}
+      {/* Graph Dashboard */}
       <View style={styles.dashboard}>
         <Text style={styles.dashboardTitle}>Market Dashboard</Text>
         {loading ? (
           <ActivityIndicator size="large" color="#0000ff" />
         ) : (
-          !dashboardData.length && <Text>Search for stocks to see results</Text>
+          <LineChart
+            data={HARDCODED_CHART_DATA}
+            width={Dimensions.get("window").width - 16} // Full width minus padding
+            height={220}
+            chartConfig={chartConfig}
+            bezier // Smooth curve
+            style={styles.chart}
+          />
         )}
       </View>
 
@@ -196,13 +233,16 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
-    justifyContent: "center",
-    alignItems: "center",
   },
   dashboardTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 2,
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  chart: {
+    marginVertical: 8,
+    borderRadius: 8,
   },
   modalOverlay: {
     flex: 1,
@@ -230,6 +270,9 @@ const styles = StyleSheet.create({
     padding: 8,
     borderBottomWidth: 1,
     borderBottomColor: "#ddd",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   stockName: {
     fontSize: 16,
