@@ -32,8 +32,9 @@ public class AutoTradingService {
     @Autowired(required = false)
     private NotificationService notificationService;
 
-    private static final List<String> SAFE_STOCKS = List.of("AAPL", "MSFT", "AMZN", "GOOGL", "JNJ", "PG", "KO", "V",
-            "WMT", "DIS");
+    private static final List<String> SAFE_STOCKS = List.of("AAPL", "MSFT", "AMZN", "GOOGL", "NFLX", "DIS", "JPM",
+            "NKE",
+            "WMT", "JNJ");
     private static final List<String> MODERATE_STOCKS = List.of("AAPL", "MSFT", "GOOGL", "JNJ", "V", "WMT", "HD",
             "COST", "PEP", "NKE", "SQ", "SHOP", "PYPL", "AMD", "CRM");
     private static final List<String> AGGRESSIVE_STOCKS = List.of("TSLA", "NVDA", "META", "PLTR", "SNOW", "COIN",

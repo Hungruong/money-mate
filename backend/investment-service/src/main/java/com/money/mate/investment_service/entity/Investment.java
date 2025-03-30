@@ -58,12 +58,12 @@ public class Investment {
     private InvestmentType type; // manual or auto
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "strategy", nullable = false, length = 20)
-    private InvestmentStrategy strategy; // value or growth
+    @Column(name = "strategy", nullable = true, length = 20)
+    private InvestmentStrategy strategy; // for auto trade
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
-    private InvestmentStatus status; // active or inactive
+    private InvestmentStatus status; // for both manual and auto trade
 
     @Column(name = "created_at", nullable = false, updatable = false)
     @Builder.Default
@@ -87,10 +87,10 @@ public class Investment {
         paused,
         stopped
     }
-    
+
     public enum InvestmentStrategy {
         aggressive,
-        conservative, 
+        conservative,
         moderate
     }
 

@@ -77,8 +77,7 @@ public class InvestmentService {
             logger.info("Set currentValue: {}", total);
             investment.setType(InvestmentType.manual);
             logger.info("Set type: {}", Investment.InvestmentType.manual);
-            investment.setStrategy(Investment.InvestmentStrategy.aggressive);
-            logger.info("Set strategy: {}", Investment.InvestmentStrategy.aggressive);
+            logger.info("Strategy not set (null) for manual trading");
             logger.info("Created new investment: {}", investment);
         }
 
