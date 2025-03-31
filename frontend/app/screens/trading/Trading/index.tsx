@@ -70,7 +70,7 @@ const TradingScreen = () => {
 
   return (
     <View style={styles.container}>
-      <StatusBar backgroundColor="#8344a9" barStyle="light-content" />
+      <StatusBar backgroundColor="#ec529e" barStyle="light-content" />
       
       {/* App Header */}
       <View style={styles.header}>
@@ -129,7 +129,7 @@ const TradingScreen = () => {
             
             {loading ? (
               <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#8344a9" />
+                <ActivityIndicator size="large" color="#ec529e" />
                 <Text style={styles.loadingText}>Searching market data...</Text>
               </View>
             ) : searchResults.length === 0 ? (
@@ -182,7 +182,7 @@ const TradingScreen = () => {
           style={styles.navButton} 
           onPress={() => navigation.navigate("Portfolio")}
         >
-          <Ionicons name="briefcase-outline" size={24} color="#8344a9" />
+          <Ionicons name="briefcase-outline" size={24} color="#ec529e" />
           <Text style={styles.navButtonText}>Portfolio</Text>
         </TouchableOpacity>
         
@@ -190,7 +190,7 @@ const TradingScreen = () => {
           style={styles.navButton} 
           onPress={() => navigation.navigate("TransactionHistory")}
         >
-          <Ionicons name="list-outline" size={24} color="#8344a9" />
+          <Ionicons name="list-outline" size={24} color="#ec529e" />
           <Text style={styles.navButtonText}>Transaction</Text>
         </TouchableOpacity>
         
@@ -206,7 +206,7 @@ const TradingScreen = () => {
           style={styles.navButton} 
           onPress={() => navigation.navigate("AutoTrade")}
         >
-          <Ionicons name="flash-outline" size={24} color="#8344a9" />
+          <Ionicons name="flash-outline" size={24} color="#ec529e" />
           <Text style={styles.navButtonText}>Auto</Text>
         </TouchableOpacity>
         
@@ -214,7 +214,7 @@ const TradingScreen = () => {
           style={styles.navButton} 
           onPress={() => navigation.navigate("ManualTrade")}
         >
-          <Ionicons name="hand-left-outline" size={24} color="#8344a9" />
+          <Ionicons name="hand-left-outline" size={24} color="#ec529e" />
           <Text style={styles.navButtonText}>Manual</Text>
         </TouchableOpacity>
       </View>
@@ -225,10 +225,10 @@ const TradingScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f4fc",
+    backgroundColor: "#fef4ff",
   },
   header: {
-    backgroundColor: "#f8dcfe",
+    backgroundColor: "#f9c4f4",
     padding: 16,
     paddingTop: 48,
     elevation: 4,
@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   headerTitle: {
-    color: "black",
+    color: "#333",
     fontSize: 22,
     fontWeight: "bold",
     textAlign: "center",
@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: 24,
     elevation: 6,
-    shadowColor: "#8344a9",
+    shadowColor: "#ec529e",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -279,12 +279,12 @@ const styles = StyleSheet.create({
     width: "100%",
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f8f8f8",
+    backgroundColor: "#fff5fd",
     borderRadius: 12,
     paddingHorizontal: 16,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: "#ececec",
+    borderColor: "#f9c4f4",
   },
   searchIcon: {
     marginRight: 10,
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#8344a9",
+    backgroundColor: "#ec529e",
     paddingVertical: 14,
     paddingHorizontal: 24,
     borderRadius: 12,
@@ -328,21 +328,21 @@ const styles = StyleSheet.create({
   decorativeCircle1: {
     width: 200,
     height: 200,
-    backgroundColor: "#8344a9",
+    backgroundColor: "#ec529e",
     top: "10%",
     left: "-20%",
   },
   decorativeCircle2: {
     width: 150,
     height: 150,
-    backgroundColor: "#a865d4",
+    backgroundColor: "#f9c4f4",
     bottom: "15%",
     right: "-10%",
   },
   decorativeCircle3: {
     width: 100,
     height: 100,
-    backgroundColor: "#c985ff",
+    backgroundColor: "#ec529e",
     top: "60%",
     left: "20%",
   },
@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     padding: 20,
-    backgroundColor: "#8344a9",
+    backgroundColor: "#ec529e",
   },
   modalTitle: {
     fontSize: 20,
@@ -431,7 +431,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#f0e6ff",
+    backgroundColor: "#fff0f5",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 14,
@@ -439,7 +439,7 @@ const styles = StyleSheet.create({
   stockLogoText: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#8344a9",
+    color: "#ec529e",
   },
   stockInfo: {
     flex: 1,
@@ -468,19 +468,19 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   tradeButton: {
-    backgroundColor: "#f0e6ff",
+    backgroundColor: "#fff0f5",
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 8,
   },
   tradeButtonText: {
-    color: "#8344a9",
+    color: "#ec529e",
     fontWeight: "bold",
     fontSize: 12,
   },
   bottomNav: {
     flexDirection: "row",
-    backgroundColor: "#f8dcfe",
+    backgroundColor: "#f9c4f4",
     paddingVertical: 8,
     paddingHorizontal: 4,
     borderTopLeftRadius: 24,
@@ -500,9 +500,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   navButtonActive: {
-    backgroundColor: "#8344a9",
+    backgroundColor: "#ec529e",
     elevation: 4,
-    shadowColor: "#8344a9",
+    shadowColor: "#ec529e",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 2,

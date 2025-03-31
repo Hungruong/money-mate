@@ -75,7 +75,7 @@ const TransactionHistory = () => {
 
   const renderItem = ({ item }: { item: any }) => {
     // Background colors for buy and sell transactions
-    const buyColors = { mainBg: "#E8F5E9", secondaryBg: "#C8E6C9" };
+    const buyColors = { mainBg: "#d6ebff", secondaryBg: "#f5f9ff" };
     const sellColors = { mainBg: "#FCE4EC", secondaryBg: "#F8BBD0" };
     const bgColors = item.purchaseType === "buy" ? buyColors : sellColors;
 
@@ -221,7 +221,7 @@ const TransactionHistory = () => {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: "#E0FFFF" }]}>
+    <View style={[styles.container, { backgroundColor: "#ffe9f0" }]}>
       {/* Title with icons */}
       <View style={styles.titleContainer}>
         <FontAwesome name="history" size={24} color="#4A4A4A" />

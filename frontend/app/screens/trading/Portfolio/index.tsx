@@ -331,7 +331,7 @@ const Portfolio = () => {
   if (isLoading && !refreshing) {
     return (
       <View style={[styles.container, styles.centered]}>
-        <ActivityIndicator size="large" color="#8b5cf6" />
+        <ActivityIndicator size="large" color="#6b7db3" />
         <Text style={styles.loadingText}>Loading portfolio...</Text>
       </View>
     );
@@ -405,7 +405,7 @@ const Portfolio = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fed0f0",
+    backgroundColor: "#ffd0d7", // Updated to the specified color
     padding: 20,
   },
   centered: {
@@ -469,13 +469,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   sortButton: {
-    backgroundColor: "#e9d5ff",
+    backgroundColor: "#e8f4f8", // Updated to the specified color
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 15,
   },
   sortButtonText: {
-    color: "#4a148c",
+    color: "#3d5a80", // Updated to complement the new color scheme
     fontWeight: "bold",
   },
   list: {
@@ -503,7 +503,7 @@ const styles = StyleSheet.create({
   symbolText: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#4a148c",
+    color: "#3d5a80", // Updated to complement the new color scheme
   },
   valueText: {
     fontSize: 18,
@@ -550,7 +550,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     paddingVertical: 12,
     paddingHorizontal: 20,
-    backgroundColor: "#8b5cf6",
+    backgroundColor: "#6b7db3", // Updated to complement the new color scheme
     borderRadius: 8,
   },
   addButtonText: {
@@ -561,7 +561,7 @@ const styles = StyleSheet.create({
   refreshButton: {
     marginTop: 15,
     padding: 12,
-    backgroundColor: "#a855f7",
+    backgroundColor: "#6b7db3", // Updated to complement the new color scheme
     borderRadius: 8,
     alignItems: "center",
   },
@@ -608,7 +608,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5",
   },
   activeToggle: {
-    backgroundColor: "#8b5cf6",
+    backgroundColor: "#6b7db3", // Updated to complement the new color scheme
   },
   toggleText: {
     fontWeight: "bold",
@@ -628,7 +628,7 @@ const styles = StyleSheet.create({
   },
   transactionPreview: {
     marginBottom: 20,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#e8f4f8", // Updated to the specified color
     padding: 10,
     borderRadius: 5,
   },
@@ -651,7 +651,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#e2e8f0",
   },
   confirmButton: {
-    backgroundColor: "#8b5cf6",
+    backgroundColor: "#6b7db3", // Updated to complement the new color scheme
+    borderWidth: 1,
+    borderColor: "#5a6b9a",
   },
   buttonText: {
     fontWeight: "bold",
