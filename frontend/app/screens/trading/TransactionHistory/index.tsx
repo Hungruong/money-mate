@@ -10,16 +10,15 @@ import {
   ScrollView,
   Dimensions
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { useFonts, PlayfairDisplay_400Regular } from "@expo-google-fonts/playfair-display";
 import { FontAwesome } from '@expo/vector-icons';
 
 const TransactionHistory = () => {
-  const [transactions, setTransactions] = useState([]);
+  const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [selectedTransaction, setSelectedTransaction] = useState<any | null>(null);
   const [filterType, setFilterType] = useState("all"); // "all", "buy", "sell"
   
   const hardcodedUserId = "27431f9a-3b99-426f-909e-5301102b115d";
@@ -36,7 +35,7 @@ const TransactionHistory = () => {
       const data = await response.json();
       console.info("Raw Data:", data);
 
-      const formattedTransactions = data.map((transaction) => ({
+      const formattedTransactions = data.map((transaction: any) => ({
         id: transaction.transactionId,
         date: new Date(transaction.timestamp).toLocaleDateString(),
         tickerSymbol: transaction.investment?.symbol || "N/A",
@@ -64,7 +63,7 @@ const TransactionHistory = () => {
     fetchTransactions();
   };
 
-  const handleTransactionPress = (transaction) => {
+  const handleTransactionPress = (transaction: any) => {
     setSelectedTransaction(transaction);
     setModalVisible(true);
   };
@@ -74,19 +73,22 @@ const TransactionHistory = () => {
     return transactions.filter(t => t.purchaseType === filterType);
   };
 
-  const renderItem = ({ item }) => {
+  const renderItem = ({ item }: { item: any }) => {
+    // Background colors for buy and sell transactions
+    const buyColors = { mainBg: "#E8F5E9", secondaryBg: "#C8E6C9" };
+    const sellColors = { mainBg: "#FCE4EC", secondaryBg: "#F8BBD0" };
+    const bgColors = item.purchaseType === "buy" ? buyColors : sellColors;
+
     return (
       <TouchableOpacity
         style={styles.transactionItem}
         onPress={() => handleTransactionPress(item)}
         activeOpacity={0.9}
       >
-        <LinearGradient
-          colors={item.purchaseType === "buy" ? ["#E8F5E9", "#C8E6C9"] : ["#FCE4EC", "#F8BBD0"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.gradientBackground}
-        >
+        <View style={[
+          styles.gradientBackground,
+          { backgroundColor: bgColors.mainBg }
+        ]}>
           <View style={styles.transactionDetails}>
             <Text style={styles.date}>{item.date}</Text>
             <Text style={styles.tickerSymbol}>{item.tickerSymbol}</Text>
@@ -117,7 +119,7 @@ const TransactionHistory = () => {
               <Text style={styles.purchaseType}>{item.purchaseType.toUpperCase()}</Text>
             </View>
           </View>
-        </LinearGradient>
+        </View>
       </TouchableOpacity>
     );
   };
@@ -134,10 +136,7 @@ const TransactionHistory = () => {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
-            <LinearGradient
-              colors={["#FFFFFF", "#F5F5F5"]}
-              style={styles.modalContent}
-            >
+            <View style={styles.modalContent}>
               <View style={styles.modalHeader}>
                 <Text style={styles.modalTitle}>{selectedTransaction.tickerSymbol}</Text>
                 <TouchableOpacity
@@ -210,7 +209,7 @@ const TransactionHistory = () => {
                   <Text style={styles.actionButtonText}>Close</Text>
                 </TouchableOpacity>
               </View>
-            </LinearGradient>
+            </View>
           </View>
         </View>
       </Modal>
@@ -222,12 +221,7 @@ const TransactionHistory = () => {
   }
 
   return (
-    <LinearGradient
-      colors={["#E0FFFF", "#ADD8E6"]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 0, y: 1 }}
-      style={styles.container}
-    >
+    <View style={[styles.container, { backgroundColor: "#E0FFFF" }]}>
       {/* Title with icons */}
       <View style={styles.titleContainer}>
         <FontAwesome name="history" size={24} color="#4A4A4A" />
@@ -302,7 +296,7 @@ const TransactionHistory = () => {
       </View>
 
       {renderTransactionModal()}
-    </LinearGradient>
+    </View>
   );
 };
 
@@ -498,6 +492,7 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     borderRadius: 16,
+    backgroundColor: '#FFFFFF',
   },
   modalHeader: {
     flexDirection: 'row',
