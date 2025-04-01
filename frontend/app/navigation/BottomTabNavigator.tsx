@@ -1,12 +1,11 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
-
 import HomeScreen from "../screens/home";
-import ProfileScreen from "../screens/profile";
 import TradingScreen from "../screens/trading";
 import GroupSavingScreen from "../screens/GroupSaving";
 import BillSplitScreen from "../screens/BillSplit";
-
+import AppNavigator from "./UserProfileNavigator";
+import GroupSavingNavigator from "./GroupSavingNavigator";
 const Tab = createBottomTabNavigator();
 
 export default function BottomTabNavigator() {
@@ -30,9 +29,9 @@ export default function BottomTabNavigator() {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Trading" component={TradingScreen} />
-      <Tab.Screen name="Group Saving" component={GroupSavingScreen} />
+      <Tab.Screen name="Group Saving" component={GroupSavingNavigator} />
       <Tab.Screen name="Bill Split" component={BillSplitScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="Profile" component={AppNavigator} />
     </Tab.Navigator>
   );
 }
