@@ -19,9 +19,9 @@ export type GroupSavingStackParamList = {
   GroupHome:{planId:string};
   GroupMemProfile:undefined;
   GroupMemberRemove:undefined;
-  SetRule:undefined;
-  GroupDelete:undefined;
-  SetGoal:undefined;
+  SetRule:{planId:string};
+  GroupDelete:{planId:string};
+  SetGoal:{planId:string};
   
 };
 

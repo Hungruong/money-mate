@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet, Alert, ScrollView, TextInput, FlatList } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Alert, ScrollView, TextInput, FlatList, ActivityIndicator } from "react-native";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import React, { useEffect,useState } from 'react';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -6,18 +6,26 @@ import { Modal } from "react-native";
 import { GroupSavingStackParamList } from "../../navigation/GroupSavingNavigator"; // Import GroupSavingStackParamList
 import { Button } from "react-native";
 import axios from 'axios';
+//import { GroupSavingScreenNavigationProp } from '../types/navigationTypes';
+import DateTimePicker from '@react-native-community/datetimepicker';
+//import { Picker } from '@react-native-picker/picker';
+import { Picker } from '@react-native-picker/picker';
+import { SavingGoal } from "@/app/types/SavingGoal";
+
+//import { DatePickerOptions } from "@react-native-community/datetimepicker";
 //import { navigate } from "expo-router/build/global-state/routing";
 type GroupSavingScreenNavigationProp = StackNavigationProp<GroupSavingStackParamList, 'GroupSavingHome'>;
 type GroupHomeScreenRouteProp = RouteProp<GroupSavingStackParamList, 'GroupHome'>;
 //type GroupSavingScreenNavigationProp = StackNavigationProp<GroupSavingStackParamList, 'GroupSavingHome'>;
 
 //const navigate = useNavigation();
-interface GoalData {
+interface Goal {
   planId:string,
   title: string;
   amount: number;
   deadline: string;
   ruleDescription: string;
+  goalId:string
 }
 interface Rule {
   planId: string;
@@ -81,6 +89,7 @@ export function SetRuleOld() {
         <Text>Set Rule</Text>
     );
 }
+
 //<SetRule planId="550d8581-a5b1-4021-b90d-52a350470d7f" />
 export function SetRule() {
   const navigation = useNavigation<GroupSavingScreenNavigationProp>();
@@ -216,178 +225,109 @@ export function GroupDelete() {
     );
 }
 
-export function SetGoalOld() {
-    const navigation = useNavigation<GroupSavingScreenNavigationProp>();
-    return(
-        <Text>Set Goal</Text>
-
-    );
-}
-
-
 export function SetGoal() {
   const navigation = useNavigation<GroupSavingScreenNavigationProp>();
-  const [GoalData, setGoalData] = useState<GoalData>({
-    planId: "123e4567-e89b-12d3-a456-426614174000",
-    title: '',
-    amount: 0,
-    deadline: '',
-    ruleDescription: ''
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const route = useRoute<GroupHomeScreenRouteProp>();
+  const { planId } = route.params;
+  const [goals, setGoals] = useState<Goal[]>([]);
+  const [newGoal, setNewGoal] = useState<Omit<Goal, 'goalId'>>({ planId, title: '', amount: 0, deadline: '', ruleDescription: '' });
+  const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
 
-  const handleInputChange = (name: keyof GoalData, value: string | number) => {
-    console.log(`Updating ${name} with value:`, value); // Debugging input changes
-  
-    setGoalData(prev => ({
-      ...prev,
-      [name]: name === 'amount' 
-        ? parseFloat(value.toString()) || 0  // Ensure it's converted properly
-        : value
-    }));
-  };
-  const validateGoalData = (data: GoalData) => {
-    const errors: string[] = [];
-  
-    if (typeof data.planId !== 'string') {
-      errors.push(`Invalid type for planId: expected string, got ${typeof data.planId}`);
-    }
-    if (typeof data.title !== 'string') {
-      errors.push(`Invalid type for title: expected string, got ${typeof data.title}`);
-    }
-    if (typeof data.amount !== 'number' || isNaN(data.amount)) {
-      errors.push(`Invalid type for targetAmount: expected number, got ${typeof data.amount}`);
-    }
-    if (typeof data.deadline !== 'string') {
-      errors.push(`Invalid type for deadline: expected string, got ${typeof data.deadline}`);
-    }
-    if (typeof data.ruleDescription !== 'string') {
-      errors.push(`Invalid type for ruleDescription: expected string, got ${typeof data.ruleDescription}`);
-    }
-  
-    if (errors.length > 0) {
-      console.log("Validation Errors:", errors);
-    } else {
-      console.log("All types are correct:", data);
-    }
-  };
-  
-  
-  
+  useEffect(() => {
+      fetchGoals();
+  }, []);
 
-  const handleSubmit = async () => {
-    //e.preventDefault();
-    validateGoalData(GoalData);
-    console.log("Submitting Goal Data:", GoalData); 
-    setIsSubmitting(true);
-    setError(null);
-
-    try {
-      console.log("Pass")
-      const response = await fetch(`${GOAL_URL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(GoalData),
-        credentials: 'include'
-        
-      });
-      
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
+  const fetchGoals = async () => {
+      try {
+          const response = await axios.get<Goal[]>(GOAL_URL);
+          setGoals(response.data);
+      } catch (error) {
+          console.error('Error fetching goals:', error);
+          Alert.alert('Error fetching goals');
       }
-      console.log("Pass")
-
-      const result = await response.json();
-      //navigate('/goals');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create goal');
-    } finally {
-      setIsSubmitting(false);
+  };
+  const handleSubmit = async () => {
+    try {
+        if (editingGoal) {
+            await axios.put(`${GOAL_URL}/${editingGoal.goalId}`, { ...newGoal, goalId: editingGoal.goalId });
+            Alert.alert('Goal updated successfully!');
+        } else {
+            await axios.post(GOAL_URL, newGoal);
+            Alert.alert('Goal created successfully!');
+        }
+        fetchGoals();
+        setNewGoal({ planId, title: '', amount: 0, deadline: '', ruleDescription: '' }); // Reset form
+        setEditingGoal(null); // Clear editing state
+    } catch (error) {
+        console.error('Error saving goal:', error);
+        Alert.alert('Error saving goal');
     }
+  };
+
+
+  const handleDelete = async (goalId:string) => {
+      try {
+          await axios.delete(`${GOAL_URL}/${goalId}`);
+          Alert.alert('Goal deleted successfully!');
+          fetchGoals();
+      } catch (error) {
+          console.error('Error deleting goal:', error);
+          Alert.alert('Error deleting goal');
+      }
+  };
+
+  const handleEdit = (goal:Goal) => {
+      setNewGoal({ planId: goal.planId, title: goal.title, amount: goal.amount, deadline: goal.deadline, ruleDescription: goal.ruleDescription });
+      setEditingGoal(goal);
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.modalContainer}>
-        <Text style={styles.modalText}>Create New Goal</Text>
-        
-        {error && <Text style={styles.errorText}>{error}</Text>}
-        
-        <ScrollView style={styles.formContainer}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Goal Title</Text>
-            <TextInput
+      <View style={styles.container}>
+          <Text style={styles.title}>Set Goal</Text>
+          <TextInput
+              placeholder="Goal Title"
+              value={newGoal.title}
+              onChangeText={(text) => setNewGoal({ ...newGoal, title: text })}
               style={styles.input}
-              value={GoalData.title}
-              onChangeText={(text) => handleInputChange('title', text)}
-              placeholder="Enter goal title"
-           
-            />
-          </View>
-          
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Description</Text>
-            <TextInput
-              style={[styles.input, styles.textArea]}
-              value={GoalData.ruleDescription}
-              onChangeText={(text) => handleInputChange('ruleDescription', text)}
-              placeholder="Enter description"
-              multiline
-              numberOfLines={4}
-            />
-          </View>
-          
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Target Date</Text>
-            <TextInput
+          />
+          <TextInput
+              placeholder="Amount"
+              value={String(newGoal.amount)}
+              keyboardType="numeric"
+              onChangeText={(text) => setNewGoal({ ...newGoal, amount: parseFloat(text) })}
               style={styles.input}
-              value={GoalData.deadline}
-              onChangeText={(text) => handleInputChange('deadline', text)}
-              placeholder="YYYY-MM-DD"
-             
-            />
-          </View>
-          
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Target Amount (optional)</Text>
-            <TextInput
+          />
+          <TextInput
+              placeholder="Deadline (YYYY-MM-DD)"
+              value={newGoal.deadline}
+              onChangeText={(text) => setNewGoal({ ...newGoal, deadline: text })}
               style={styles.input}
-              value={GoalData.amount.toString()}
-              onChangeText={(text) => handleInputChange('amount', text)}
-              placeholder="0.00"
-              keyboardType="decimal-pad"
-            />
-          </View>
-          
-          
-        </ScrollView>
-        
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity 
-            style={[styles.button, styles.cancelButton]}
-            onPress={() => navigation.goBack()}
-          >
-            <Text style={styles.buttonText}>Cancel</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            
-            style={[styles.button, styles.confirmButton]}
-            
-            onPress={handleSubmit}
-            disabled={isSubmitting}
-          >
-            <Text style={styles.buttonText}>
-              {isSubmitting ? 'Creating...' : 'Create Goal'}
-            </Text>
-          </TouchableOpacity>
-        </View>
+          />
+          <TextInput
+              placeholder="Rule Description"
+              value={newGoal.ruleDescription}
+              onChangeText={(text) => setNewGoal({ ...newGoal, ruleDescription: text })}
+              style={styles.input}
+          />
+          <Button title={editingGoal ? 'Update Goal' : 'Create Goal'} onPress={handleSubmit} />
+
+          <FlatList
+              data={goals.filter(goal => goal.planId === planId)} // Filter by planId
+              keyExtractor={(item) => item.goalId}
+              renderItem={({ item }) => (
+                  <View style={styles.ruleItem}>
+                      <Text style={styles.ruleDescription}>{item.title}</Text>
+                      <Text>{`Amount: ${item.amount}`}</Text>
+                      <Text>{`Deadline: ${item.deadline}`}</Text>
+                      <Text>{`Description: ${item.ruleDescription}`}</Text>
+                      <View style={styles.buttonContainer}>
+                          <Button title="Edit" onPress={() => handleEdit(item)} />
+                          <Button title="Delete" onPress={() => handleDelete(item.goalId)} />
+                      </View>
+                  </View>
+              )}
+          />
       </View>
-    </View>
   );
 }
 
@@ -421,6 +361,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: 'bold'
   },
+  header: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+    color: '#333',
+},
   formContainer: {
     width: '100%',
     marginBottom: 20
@@ -439,6 +386,14 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
     borderRadius: 5
   },
+  picker: {
+    height: 50,
+    width: '100%',
+    backgroundColor: '#fff',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+},
   textArea: {
     height: 80,
     textAlignVertical: 'top'
@@ -500,6 +455,20 @@ const styles = StyleSheet.create({
   ruleName: {
       fontWeight: 'bold',
   },
+  currentGoalContainer: {
+    backgroundColor: '#f5f5f5',
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 20
+  },
+  currentGoalTitle: {
+    fontWeight: 'bold',
+    marginBottom: 5,
+    fontSize: 16
+  },
+  currentGoalText: {
+    marginBottom: 3
+  }
   //buttonContainer: {
       //flexDirection: 'row',
       //gap: 10,
