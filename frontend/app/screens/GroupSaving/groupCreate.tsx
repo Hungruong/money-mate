@@ -1,29 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   View, 
   Text, 
   TextInput, 
   TouchableOpacity, 
   StyleSheet,
-  FlatList,
   Modal,
   Alert,
-  Platform
+  Platform,
+  KeyboardAvoidingView,
+  ScrollView,
+  ActivityIndicator
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation } from "@react-navigation/native";
-
-interface SavingPlan {
-  planId: string;
-  planType: 'Individual' | 'Group';
-  userId: string;
-  name: string;
-  targetAmount: number;
-  currentAmount: number;
-  startDate: Date;
-  endDate: Date;
-  createdAt: Date;
-}
+import { Ionicons } from '@expo/vector-icons';
 
 interface SavingPlanFormData {
   planType: 'Individual' | 'Group';
@@ -38,8 +29,9 @@ const API_URL = 'http://localhost:8084/api/saving-plans';
 
 export default function SavingPlanCreate() {
   const navigation = useNavigation();
-  const [plans, setPlans] = useState<SavingPlan[]>([]);
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showDatePicker, setShowDatePicker] = useState<'start' | 'end' | null>(null);
   const [planData, setPlanData] = useState<SavingPlanFormData>({
     planType: 'Individual',
     userId: "122e4567-e89b-12d3-a456-426614174000", // You'll need to get this from your auth system
@@ -48,13 +40,10 @@ export default function SavingPlanCreate() {
     startDate: new Date(),
     endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)) // Default 1 month from now
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showDatePicker, setShowDatePicker] = useState<'start' | 'end' | null>(null);
+  const [success, setSuccess] = useState(false);
 
   // Handle input changes with type safety
   const handleInputChange = (name: keyof SavingPlanFormData, value: string | 'Individual' | 'Group' | Date) => {
-    console.log(`Updating ${name} with value:`, value);
     setPlanData(prev => ({
       ...prev,
       [name]: value
@@ -91,36 +80,11 @@ export default function SavingPlanCreate() {
     }
 
     if (errors.length > 0) {
-      console.log("Validation Errors:", errors);
       return errors;
     }
 
-    console.log("All plan data is valid:", data);
     return null;
   };
-
-  // Fetch saving plans
-  useEffect(() => {
-    const fetchPlans = async () => {
-      try {
-        const response = await fetch(API_URL);
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
-        }
-        const data = await response.json();
-        setPlans(data.map((plan: any) => ({
-          ...plan,
-          startDate: new Date(plan.startDate),
-          endDate: new Date(plan.endDate),
-          createdAt: new Date(plan.createdAt)
-        })));
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load saving plans');
-      }
-    };
-
-    fetchPlans();
-  }, []);
 
   // Handle plan creation
   const handleSubmit = async () => {
@@ -130,7 +94,6 @@ export default function SavingPlanCreate() {
       return;
     }
 
-    console.log("Submitting Plan Data:", planData);
     setIsSubmitting(true);
     setError(null);
 
@@ -154,22 +117,22 @@ export default function SavingPlanCreate() {
         throw new Error(`Error: ${response.status}`);
       }
 
-      const result = await response.json();
-      setPlans([...plans, {
-        ...result,
-        startDate: new Date(result.startDate),
-        endDate: new Date(result.endDate),
-        createdAt: new Date(result.createdAt)
-      }]);
-      setIsModalVisible(false);
-      setPlanData({
-        planType: 'Individual',
-        userId: 'user-id-here',
-        name: '',
-        targetAmount: '',
-        startDate: new Date(),
-        endDate: new Date(new Date().setMonth(new Date().getMonth() + 1))
-      });
+      // Show success message
+      setSuccess(true);
+      
+      // Reset form after short delay
+      setTimeout(() => {
+        setPlanData({
+          planType: 'Individual',
+          userId: "122e4567-e89b-12d3-a456-426614174000",
+          name: '',
+          targetAmount: '',
+          startDate: new Date(),
+          endDate: new Date(new Date().setMonth(new Date().getMonth() + 1))
+        });
+        setSuccess(false);
+      }, 2000);
+      
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create saving plan');
     } finally {
@@ -191,270 +154,310 @@ export default function SavingPlanCreate() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Saving Plans</Text>
-      
-      {error && (
-        <Text style={styles.errorText}>{error}</Text>
-      )}
-
-      <TouchableOpacity 
-        style={styles.createButton}
-        onPress={() => setIsModalVisible(true)}
-        disabled={isSubmitting}
-      >
-        <Text style={styles.buttonText}>
-          {isSubmitting ? 'Processing...' : 'Create New Saving Plan'}
-        </Text>
-      </TouchableOpacity>
-
-      <FlatList
-        data={plans}
-        keyExtractor={(item) => item.planId}
-        renderItem={({ item }) => (
-          <View style={styles.planCard}>
-            <Text style={styles.planName}>{item.name} ({item.planType})</Text>
-            <Text style={styles.planAmount}>Target: ${item.targetAmount.toFixed(2)}</Text>
-            <Text style={styles.planAmount}>Saved: ${item.currentAmount.toFixed(2)}</Text>
-            <Text style={styles.planDate}>Dates: {formatDate(item.startDate)} to {formatDate(item.endDate)}</Text>
-            <Text style={styles.planDate}>Created: {formatDate(item.createdAt)}</Text>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.headerContainer}>
+          <Text style={styles.header}>Create Saving Plan</Text>
+          <Text style={styles.subHeader}>Set your financial goals and track your progress</Text>
+        </View>
+        
+        {error && (
+          <View style={styles.errorContainer}>
+            <Ionicons name="alert-circle" size={20} color="#e74c3c" />
+            <Text style={styles.errorText}>{error}</Text>
           </View>
         )}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>No saving plans available. Create your first plan!</Text>
-        }
-      />
+        
+        {success && (
+          <View style={styles.successContainer}>
+            <Ionicons name="checkmark-circle" size={20} color="#2ecc71" />
+            <Text style={styles.successText}>Saving plan created successfully!</Text>
+          </View>
+        )}
 
-      <Modal
-        visible={isModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setIsModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Create New Saving Plan</Text>
-            
-            <View style={styles.typeContainer}>
-              <TouchableOpacity
-                style={[
-                  styles.typeButton,
-                  planData.planType === 'Individual' && styles.typeButtonActive
-                ]}
-                onPress={() => handleInputChange('planType', 'Individual')}
-              >
-                <Text style={styles.typeButtonText}>Individual</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.typeButton,
-                  planData.planType === 'Group' && styles.typeButtonActive
-                ]}
-                onPress={() => handleInputChange('planType', 'Group')}
-              >
-                <Text style={styles.typeButtonText}>Group</Text>
-              </TouchableOpacity>
-            </View>
-            
+        <View style={styles.card}>
+          <Text style={styles.sectionTitle}>Plan Type</Text>
+          <View style={styles.typeContainer}>
+            <TouchableOpacity
+              style={[
+                styles.typeButton,
+                planData.planType === 'Individual' && styles.typeButtonActive
+              ]}
+              onPress={() => handleInputChange('planType', 'Individual')}
+            >
+              <Ionicons 
+                name="person" 
+                size={24} 
+                color={planData.planType === 'Individual' ? '#ffffff' : '#3498db'} 
+              />
+              <Text style={[
+                styles.typeButtonText,
+                planData.planType === 'Individual' && styles.typeButtonTextActive
+              ]}>Individual</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.typeButton,
+                planData.planType === 'Group' && styles.typeButtonActive
+              ]}
+              onPress={() => handleInputChange('planType', 'Group')}
+            >
+              <Ionicons 
+                name="people" 
+                size={24} 
+                color={planData.planType === 'Group' ? '#ffffff' : '#3498db'} 
+              />
+              <Text style={[
+                styles.typeButtonText,
+                planData.planType === 'Group' && styles.typeButtonTextActive
+              ]}>Group</Text>
+            </TouchableOpacity>
+          </View>
+          
+          <Text style={styles.sectionTitle}>Plan Details</Text>
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Plan Name</Text>
             <TextInput
               style={styles.input}
-              placeholder="Plan Name"
+              placeholder="e.g., Holiday Fund, New Car"
               value={planData.name}
               onChangeText={(text) => handleInputChange('name', text)}
             />
-            
+          </View>
+          
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Target Amount ($)</Text>
             <TextInput
               style={styles.input}
-              placeholder="Target Amount"
+              placeholder="e.g., 5000"
               keyboardType="numeric"
               value={planData.targetAmount}
               onChangeText={(text) => handleInputChange('targetAmount', text)}
             />
-            
+          </View>
+          
+          <Text style={styles.sectionTitle}>Timeline</Text>
+          
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Start Date</Text>
             <TouchableOpacity
               style={styles.dateInput}
               onPress={() => setShowDatePicker('start')}
             >
-              <Text>Start Date: {formatDate(planData.startDate)}</Text>
+              <Text style={styles.dateText}>{formatDate(planData.startDate)}</Text>
+              <Ionicons name="calendar" size={20} color="#3498db" />
             </TouchableOpacity>
-            
+          </View>
+          
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Target End Date</Text>
             <TouchableOpacity
               style={styles.dateInput}
               onPress={() => setShowDatePicker('end')}
             >
-              <Text>End Date: {formatDate(planData.endDate)}</Text>
+              <Text style={styles.dateText}>{formatDate(planData.endDate)}</Text>
+              <Ionicons name="calendar" size={20} color="#3498db" />
             </TouchableOpacity>
-            
-            {showDatePicker && (
-              <DateTimePicker
-                value={showDatePicker === 'start' ? planData.startDate : planData.endDate}
-                mode="date"
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                onChange={handleDateChange}
-                minimumDate={showDatePicker === 'end' ? planData.startDate : undefined}
-              />
-            )}
-            
-            <View style={styles.modalButtons}>
-              <TouchableOpacity 
-                style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => setIsModalVisible(false)}
-                disabled={isSubmitting}
-              >
-                <Text style={styles.buttonText}>Cancel</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={[styles.modalButton, styles.submitButton]}
-                onPress={handleSubmit}
-                disabled={isSubmitting}
-              >
-                <Text style={styles.buttonText}>
-                  {isSubmitting ? 'Creating...' : 'Create Plan'}
-                </Text>
-              </TouchableOpacity>
-            </View>
           </View>
         </View>
-      </Modal>
-    </View>
+        
+        {showDatePicker && (
+          <DateTimePicker
+            value={showDatePicker === 'start' ? planData.startDate : planData.endDate}
+            mode="date"
+            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            onChange={handleDateChange}
+            minimumDate={showDatePicker === 'end' ? planData.startDate : undefined}
+          />
+        )}
+        
+        <TouchableOpacity 
+          style={styles.submitButton}
+          onPress={handleSubmit}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <ActivityIndicator color="#ffffff" />
+          ) : (
+            <>
+              <Ionicons name="save-outline" size={20} color="#ffffff" style={styles.buttonIcon} />
+              <Text style={styles.buttonText}>Create Saving Plan</Text>
+            </>
+          )}
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.cancelButton}
+          onPress={() => navigation.goBack()}
+          disabled={isSubmitting}
+        >
+          <Text style={styles.cancelButtonText}>Cancel</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f5f7fa',
+  },
+  scrollContainer: {
     padding: 20,
-    backgroundColor: '#f8f9fa',
+    paddingBottom: 40,
+  },
+  headerContainer: {
+    marginBottom: 20,
+    alignItems: 'center',
   },
   header: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#333',
+    color: '#2c3e50',
+    marginBottom: 8,
+  },
+  subHeader: {
+    fontSize: 16,
+    color: '#7f8c8d',
     textAlign: 'center',
+  },
+  card: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#2c3e50',
+    marginBottom: 12,
+    marginTop: 10,
+  },
+  errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fef2f2',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 20,
   },
   errorText: {
     color: '#e74c3c',
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  createButton: {
-    backgroundColor: '#4CAF50',
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 20,
-    alignItems: 'center',
-  },
-  planCard: {
-    backgroundColor: '#ffffff',
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  planName: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 5,
-    color: '#2c3e50',
-  },
-  planAmount: {
-    fontSize: 14,
-    color: '#7f8c8d',
-    marginBottom: 5,
-  },
-  planDate: {
-    fontSize: 12,
-    color: '#95a5a6',
-    marginBottom: 5,
-  },
-  buttonText: {
-    color: '#ffffff',
-    fontWeight: '500',
-  },
-  emptyText: {
-    textAlign: 'center',
-    marginTop: 50,
-    color: '#95a5a6',
-    fontSize: 16,
-  },
-  modalOverlay: {
+    marginLeft: 8,
     flex: 1,
-    justifyContent: 'center',
+  },
+  successContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  modalContent: {
-    width: '90%',
-    backgroundColor: '#ffffff',
-    padding: 20,
-    borderRadius: 10,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    backgroundColor: '#eafaf1',
+    padding: 12,
+    borderRadius: 8,
     marginBottom: 20,
-    textAlign: 'center',
-    color: '#2c3e50',
+  },
+  successText: {
+    color: '#2ecc71',
+    marginLeft: 8,
   },
   typeContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 15,
+    marginBottom: 20,
   },
   typeButton: {
     flex: 1,
-    padding: 10,
-    marginHorizontal: 5,
-    borderRadius: 5,
+    flexDirection: 'row',
+    padding: 15,
+    marginHorizontal: 6,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#3498db',
     alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#ffffff',
   },
   typeButtonActive: {
     backgroundColor: '#3498db',
     borderColor: '#3498db',
   },
   typeButtonText: {
-    color: '#333',
+    color: '#3498db',
+    fontWeight: '500',
+    marginLeft: 8,
+  },
+  typeButtonTextActive: {
+    color: '#ffffff',
+  },
+  inputContainer: {
+    marginBottom: 16,
+  },
+  inputLabel: {
+    fontSize: 14,
+    color: '#7f8c8d',
+    marginBottom: 6,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 6,
-    padding: 12,
-    marginBottom: 15,
+    borderColor: '#dcdfe6',
+    borderRadius: 8,
+    padding: 14,
     fontSize: 16,
     backgroundColor: '#f8f9fa',
   },
   dateInput: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 6,
-    padding: 12,
-    marginBottom: 15,
+    borderColor: '#dcdfe6',
+    borderRadius: 8,
+    padding: 14,
     backgroundColor: '#f8f9fa',
-  },
-  modalButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  modalButton: {
-    padding: 12,
-    borderRadius: 6,
-    width: '48%',
     alignItems: 'center',
   },
-  cancelButton: {
-    backgroundColor: '#95a5a6',
+  dateText: {
+    fontSize: 16,
+    color: '#2c3e50',
   },
   submitButton: {
-    backgroundColor: '#2ecc71',
+    backgroundColor: '#3498db',
+    padding: 16,
+    borderRadius: 10,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginVertical: 10,
+    shadowColor: '#3498db',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 5,
+  },
+  buttonText: {
+    color: '#ffffff',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  buttonIcon: {
+    marginRight: 8,
+  },
+  cancelButton: {
+    padding: 14,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  cancelButtonText: {
+    color: '#7f8c8d',
+    fontWeight: '500',
+    fontSize: 16,
   },
 });
