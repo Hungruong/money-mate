@@ -6,6 +6,7 @@ import GroupSavingScreen from "../screens/GroupSaving";
 import BillSplitScreen from "../screens/BillSplit";
 import AppNavigator from "./UserProfileNavigator";
 import GroupSavingNavigator from "./GroupSavingNavigator";
+import BillSplitNavigator from "./BillSplitNavigator";
 const Tab = createBottomTabNavigator();
 
 export default function BottomTabNavigator() {
@@ -23,14 +24,16 @@ export default function BottomTabNavigator() {
             Profile: "person",
           };
 
-          return <Ionicons name={icons[route.name]} size={size} color={color} />;
+          return (
+            <Ionicons name={icons[route.name]} size={size} color={color} />
+          );
         },
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Trading" component={TradingScreen} />
       <Tab.Screen name="Group Saving" component={GroupSavingNavigator} />
-      <Tab.Screen name="Bill Split" component={BillSplitScreen} />
+      <Tab.Screen name="Bill Split" component={BillSplitNavigator} />
       <Tab.Screen name="Profile" component={AppNavigator} />
     </Tab.Navigator>
   );
