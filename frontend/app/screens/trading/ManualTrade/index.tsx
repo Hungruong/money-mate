@@ -17,7 +17,7 @@ const ManualTrade = ({ navigation }: any) => {
   const [symbol, setSymbol] = useState("");
   const [quantity, setQuantity] = useState("");
   const [action, setAction] = useState("Buy");
-  const [userId] = useState("a2b0d0ab-951d-437f-81f7-c228e1d727f2"); // Mock UUID, replace with auth
+  const [userId] = useState("27431f9a-3b99-426f-909e-5301102b115d"); // Mock UUID, replace with auth
 
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
