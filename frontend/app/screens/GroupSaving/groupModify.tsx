@@ -1,15 +1,26 @@
-import { View, Text, TouchableOpacity, StyleSheet, Alert, ScrollView, TextInput, FlatList, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  ScrollView,
+  TextInput,
+  FlatList,
+  ActivityIndicator,
+  Modal
+} from "react-native";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import React, { useEffect, useState } from 'react';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { Modal } from "react-native";
-import { GroupSavingStackParamList } from "../../navigation/GroupSavingNavigator";
 import { Button } from "react-native";
 import axios from 'axios';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import { SavingGoal } from "@/app/types/SavingGoal";
+import { GroupSavingStackParamList } from "@/app/navigation/GroupSavingNavigator";
 
+// Type definitions
 type GroupSavingScreenNavigationProp = StackNavigationProp<GroupSavingStackParamList, 'GroupSavingHome'>;
 type GroupHomeScreenRouteProp = RouteProp<GroupSavingStackParamList, 'GroupHome'>;
 
@@ -28,11 +39,16 @@ interface Rule {
   description: string;
 }
 
-const GOAL_URL = "http://localhost:8084/api/saving-goals";
-const RULE_URL = "http://localhost:8084/api/saving-rules";
+// API endpoints
+const GOAL_API_URL = "http://localhost:8084/api/saving-goals";
+const RULE_API_URL = "http://localhost:8084/api/saving-rules";
 
+/**
+ * Group Member Profile Screen Component
+ */
 export function GroupMemProfile() {
   const navigation = useNavigation<GroupSavingScreenNavigationProp>();
+  
   return (
     <View style={styles.container}>
       <Text style={styles.pageTitle}>Group Member Profile</Text>
@@ -41,6 +57,9 @@ export function GroupMemProfile() {
   );
 }
 
+/**
+ * Group Member Removal Confirmation Modal
+ */
 export function GroupMemberRemove() {
   const navigation = useNavigation<GroupSavingScreenNavigationProp>();
   const [modalVisible, setModalVisible] = useState(false);
@@ -50,7 +69,7 @@ export function GroupMemberRemove() {
   }, []);
 
   const handleConfirm = () => {
-    console.log("Action Confirmed");
+    console.log("Member removal confirmed");
     setModalVisible(false);
     navigation.goBack();
   };
@@ -71,12 +90,20 @@ export function GroupMemberRemove() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>Remove Member</Text>
-            <Text style={styles.modalText}>Are you sure you want to remove this member from the group?</Text>
+            <Text style={styles.modalText}>
+              Are you sure you want to remove this member from the group?
+            </Text>
             <View style={styles.buttonRow}>
-              <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={handleCancel}>
+              <TouchableOpacity 
+                style={[styles.modalButton, styles.cancelButton]} 
+                onPress={handleCancel}
+              >
                 <Text style={styles.buttonText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.modalButton, styles.confirmButton]} onPress={handleConfirm}>
+              <TouchableOpacity 
+                style={[styles.modalButton, styles.confirmButton]} 
+                onPress={handleConfirm}
+              >
                 <Text style={styles.buttonText}>Remove</Text>
               </TouchableOpacity>
             </View>
@@ -87,45 +114,55 @@ export function GroupMemberRemove() {
   );
 }
 
+/**
+ * Group Rules Management Screen
+ */
 export function SetRule() {
   const navigation = useNavigation<GroupSavingScreenNavigationProp>();
   const route = useRoute<GroupHomeScreenRouteProp>();
   const { planId } = route.params;
+  
   const [rules, setRules] = useState<Rule[]>([]);
-  const [newRule, setNewRule] = useState<Omit<Rule, 'ruleId'>>({ planId, description: '' });
+  const [newRule, setNewRule] = useState<Omit<Rule, 'ruleId'>>({ 
+    planId, 
+    description: '' 
+  });
   const [editingRule, setEditingRule] = useState<Rule | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     fetchRules();
   }, []);
 
   const fetchRules = async () => {
-    setLoading(true);
+    setIsLoading(true);
     try {
-      const response = await axios.get<Rule[]>(RULE_URL);
+      const response = await axios.get<Rule[]>(RULE_API_URL);
       setRules(response.data);
     } catch (error) {
-      console.error('Error fetching rules:', error);
+      console.error('Failed to fetch rules:', error);
       Alert.alert('Error', 'Unable to load rules. Please try again later.');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   const handleSubmit = async () => {
     if (!newRule.description.trim()) {
-      Alert.alert('Error', 'Please enter a rule description');
+      Alert.alert('Validation Error', 'Please enter a rule description');
       return;
     }
 
-    setLoading(true);
+    setIsLoading(true);
     try {
       if (editingRule) {
-        await axios.put(`${RULE_URL}/${editingRule.ruleId}`, { ...newRule, ruleId: editingRule.ruleId });
+        await axios.put(`${RULE_API_URL}/${editingRule.ruleId}`, { 
+          ...newRule, 
+          ruleId: editingRule.ruleId 
+        });
         Alert.alert('Success', 'Rule updated successfully!');
       } else {
-        await axios.post(RULE_URL, newRule);
+        await axios.post(RULE_API_URL, newRule);
         Alert.alert('Success', 'Rule created successfully!');
       }
       fetchRules();
@@ -135,13 +172,13 @@ export function SetRule() {
       console.error('Error saving rule:', error);
       Alert.alert('Error', 'Unable to save rule. Please try again later.');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   const handleDelete = async (ruleId: string) => {
     Alert.alert(
-      'Confirm Delete',
+      'Confirm Deletion',
       'Are you sure you want to delete this rule?',
       [
         { text: 'Cancel', style: 'cancel' },
@@ -149,16 +186,16 @@ export function SetRule() {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
-            setLoading(true);
+            setIsLoading(true);
             try {
-              await axios.delete(`${RULE_URL}/${ruleId}`);
+              await axios.delete(`${RULE_API_URL}/${ruleId}`);
               Alert.alert('Success', 'Rule deleted successfully!');
               fetchRules();
             } catch (error) {
               console.error('Error deleting rule:', error);
               Alert.alert('Error', 'Unable to delete rule. Please try again later.');
             } finally {
-              setLoading(false);
+              setIsLoading(false);
             }
           }
         }
@@ -167,7 +204,10 @@ export function SetRule() {
   };
 
   const handleEdit = (rule: Rule) => {
-    setNewRule({ planId: rule.planId, description: rule.description });
+    setNewRule({ 
+      planId: rule.planId, 
+      description: rule.description 
+    });
     setEditingRule(rule);
   };
 
@@ -184,10 +224,14 @@ export function SetRule() {
           style={styles.textInput}
           multiline
         />
+        
         <TouchableOpacity
-          style={[styles.actionButton, editingRule ? styles.updateButton : styles.createButton]}
+          style={[
+            styles.actionButton, 
+            editingRule ? styles.updateButton : styles.createButton
+          ]}
           onPress={handleSubmit}
-          disabled={loading}
+          disabled={isLoading}
         >
           <Text style={styles.buttonText}>
             {editingRule ? 'Update Rule' : 'Create Rule'}
@@ -197,7 +241,7 @@ export function SetRule() {
 
       <Text style={styles.sectionTitle}>Existing Rules</Text>
       
-      {loading ? (
+      {isLoading ? (
         <ActivityIndicator size="large" color="#0066cc" style={styles.loader} />
       ) : (
         <FlatList
@@ -231,28 +275,35 @@ export function SetRule() {
   );
 }
 
+/**
+ * Group Deletion Confirmation Modal
+ */
 export function GroupDelete() {
   const navigation = useNavigation<GroupSavingScreenNavigationProp>();
   const route = useRoute<GroupHomeScreenRouteProp>();
-  const [modalVisible, setModalVisible] = useState(false);
   const { planId } = route.params;
-  const [loading, setLoading] = useState(false);
+  
+  const [modalVisible, setModalVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setModalVisible(true);
   }, []);
 
   const handleConfirm = async () => {
-    setLoading(true);
+    setIsLoading(true);
     try {
       await axios.delete(`http://localhost:8084/api/saving-groups/${planId}`);
       setModalVisible(false);
       navigation.navigate("GroupSavingHome");
     } catch (error) {
-      console.error("Error deleting group:", error);
-      Alert.alert("Error", "Unable to delete the group. Please try again later.");
+      console.error("Failed to delete group:", error);
+      Alert.alert(
+        "Error", 
+        "Unable to delete the group. Please try again later."
+      );
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -272,21 +323,24 @@ export function GroupDelete() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>Delete Group</Text>
-            <Text style={styles.modalText}>Are you sure you want to delete this savings group? This action cannot be undone.</Text>
+            <Text style={styles.modalText}>
+              Are you sure you want to delete this savings group? 
+              This action cannot be undone.
+            </Text>
             <View style={styles.buttonRow}>
               <TouchableOpacity 
                 style={[styles.modalButton, styles.cancelButton]} 
                 onPress={handleCancel}
-                disabled={loading}
+                disabled={isLoading}
               >
                 <Text style={styles.buttonText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={[styles.modalButton, styles.dangerButton]} 
                 onPress={handleConfirm}
-                disabled={loading}
+                disabled={isLoading}
               >
-                {loading ? (
+                {isLoading ? (
                   <ActivityIndicator size="small" color="white" />
                 ) : (
                   <Text style={styles.buttonText}>Delete</Text>
@@ -300,10 +354,14 @@ export function GroupDelete() {
   );
 }
 
+/**
+ * Savings Goal Management Screen
+ */
 export function SetGoal() {
   const navigation = useNavigation<GroupSavingScreenNavigationProp>();
   const route = useRoute<GroupHomeScreenRouteProp>();
   const { planId } = route.params;
+  
   const [goals, setGoals] = useState<Goal[]>([]);
   const [newGoal, setNewGoal] = useState<Omit<Goal, 'goalId'>>({ 
     planId, 
@@ -313,7 +371,7 @@ export function SetGoal() {
     ruleDescription: '' 
   });
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   useEffect(() => {
@@ -321,43 +379,42 @@ export function SetGoal() {
   }, []);
 
   const fetchGoals = async () => {
-    setLoading(true);
+    setIsLoading(true);
     try {
-      const response = await axios.get<Goal[]>(GOAL_URL);
+      const response = await axios.get<Goal[]>(GOAL_API_URL);
       setGoals(response.data);
     } catch (error) {
-      console.error('Error fetching goals:', error);
+      console.error('Failed to fetch goals:', error);
       Alert.alert('Error', 'Unable to load goals. Please try again later.');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   const handleSubmit = async () => {
-    // Validation
     if (!newGoal.title.trim()) {
-      Alert.alert('Error', 'Please enter a goal title');
+      Alert.alert('Validation Error', 'Please enter a goal title');
       return;
     }
     if (newGoal.amount <= 0) {
-      Alert.alert('Error', 'Please enter a valid amount');
+      Alert.alert('Validation Error', 'Please enter a valid amount');
       return;
     }
     if (!newGoal.deadline) {
-      Alert.alert('Error', 'Please select a deadline');
+      Alert.alert('Validation Error', 'Please select a deadline');
       return;
     }
 
-    setLoading(true);
+    setIsLoading(true);
     try {
       if (editingGoal) {
-        await axios.put(`${GOAL_URL}/${editingGoal.goalId}`, { 
+        await axios.put(`${GOAL_API_URL}/${editingGoal.goalId}`, { 
           ...newGoal, 
           goalId: editingGoal.goalId 
         });
         Alert.alert('Success', 'Goal updated successfully!');
       } else {
-        await axios.post(GOAL_URL, newGoal);
+        await axios.post(GOAL_API_URL, newGoal);
         Alert.alert('Success', 'Goal created successfully!');
       }
       fetchGoals();
@@ -373,13 +430,13 @@ export function SetGoal() {
       console.error('Error saving goal:', error);
       Alert.alert('Error', 'Unable to save goal. Please try again later.');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   const handleDelete = async (goalId: string) => {
     Alert.alert(
-      'Confirm Delete',
+      'Confirm Deletion',
       'Are you sure you want to delete this goal?',
       [
         { text: 'Cancel', style: 'cancel' },
@@ -387,16 +444,16 @@ export function SetGoal() {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
-            setLoading(true);
+            setIsLoading(true);
             try {
-              await axios.delete(`${GOAL_URL}/${goalId}`);
+              await axios.delete(`${GOAL_API_URL}/${goalId}`);
               Alert.alert('Success', 'Goal deleted successfully!');
               fetchGoals();
             } catch (error) {
               console.error('Error deleting goal:', error);
               Alert.alert('Error', 'Unable to delete goal. Please try again later.');
             } finally {
-              setLoading(false);
+              setIsLoading(false);
             }
           }
         }
@@ -424,7 +481,11 @@ export function SetGoal() {
   };
 
   const formatCurrency = (amount: number) => {
-    return `$${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2
+    }).format(amount);
   };
 
   return (
@@ -483,9 +544,12 @@ export function SetGoal() {
           />
           
           <TouchableOpacity
-            style={[styles.actionButton, editingGoal ? styles.updateButton : styles.createButton]}
+            style={[
+              styles.actionButton, 
+              editingGoal ? styles.updateButton : styles.createButton
+            ]}
             onPress={handleSubmit}
-            disabled={loading}
+            disabled={isLoading}
           >
             <Text style={styles.buttonText}>
               {editingGoal ? 'Update Goal' : 'Create Goal'}
@@ -495,7 +559,7 @@ export function SetGoal() {
 
         <Text style={styles.sectionTitle}>Current Goals</Text>
         
-        {loading ? (
+        {isLoading ? (
           <ActivityIndicator size="large" color="#0066cc" style={styles.loader} />
         ) : (
           <FlatList
@@ -508,13 +572,19 @@ export function SetGoal() {
               <View style={styles.goalCard}>
                 <View style={styles.goalHeader}>
                   <Text style={styles.goalTitle}>{item.title}</Text>
-                  <Text style={styles.goalAmount}>{formatCurrency(item.amount)}</Text>
+                  <Text style={styles.goalAmount}>
+                    {formatCurrency(item.amount)}
+                  </Text>
                 </View>
                 
                 <View style={styles.goalDetails}>
-                  <Text style={styles.goalDeadline}>Deadline: {item.deadline}</Text>
+                  <Text style={styles.goalDeadline}>
+                    Deadline: {item.deadline}
+                  </Text>
                   {item.ruleDescription ? (
-                    <Text style={styles.goalDescription}>{item.ruleDescription}</Text>
+                    <Text style={styles.goalDescription}>
+                      {item.ruleDescription}
+                    </Text>
                   ) : null}
                 </View>
                 
@@ -541,6 +611,7 @@ export function SetGoal() {
   );
 }
 
+// Stylesheet
 const styles = StyleSheet.create({
   // Layout containers
   scrollContainer: {
@@ -556,6 +627,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#f8f9fa',
   },
   
   // Headings
@@ -785,10 +861,5 @@ const styles = StyleSheet.create({
   // Misc
   loader: {
     marginVertical: 24,
-  },
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: '#f8f9fa',
   },
 });

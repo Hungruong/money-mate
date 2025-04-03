@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { 
   View, 
   Text, 
@@ -13,16 +13,20 @@ import {
   ActivityIndicator,
   Dimensions
 } from 'react-native';
-import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { GroupSavingStackParamList } from "../../navigation/GroupSavingNavigator";
+import { GroupSavingStackParamList } from '../../navigation/GroupSavingNavigator';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { LinearGradient } from 'expo-linear-gradient';
 
-const SAVING_API_URL = 'http://localhost:8084/api/saving-plans';
-const MEMBER_API_URL = 'http://localhost:8084/api/saving-members';
+// Constants
+const API_BASE_URL = 'http://localhost:8084/api';
+const USER_API_URL = 'http://localhost:8082/api/users';
+const SAVING_API_URL = `${API_BASE_URL}/saving-plans`;
+const MEMBER_API_URL = `${API_BASE_URL}/saving-members`;
 const { width } = Dimensions.get('window');
 
+// Types
 type GroupHomeScreenRouteProp = RouteProp<GroupSavingStackParamList, 'GroupHome'>;
 type GroupSavingScreenNavigationProp = StackNavigationProp<GroupSavingStackParamList, 'GroupSavingHome'>;
 
@@ -48,11 +52,19 @@ interface GroupData {
   createdAt: string;
 }
 
+interface ProgressBarProps {
+  progress: number;
+}
+
+/**
+ * GroupHome component - Displays detailed information about a group saving plan
+ */
 export default function GroupHome() {
   const navigation = useNavigation<GroupSavingScreenNavigationProp>();
   const route = useRoute<GroupHomeScreenRouteProp>();
   const { planId } = route.params;
   
+  // State management
   const [groupData, setGroupData] = useState<GroupData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -62,7 +74,10 @@ export default function GroupHome() {
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [memberActionModalVisible, setMemberActionModalVisible] = useState(false);
 
-  const fetchGroupData = async () => {
+  /**
+   * Fetches group data and member information
+   */
+  const fetchGroupData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -81,7 +96,7 @@ export default function GroupHome() {
       const membersWithDetails = await Promise.all(
         membersData.map(async (member: any) => {
           try {
-            const userResponse = await fetch(`http://localhost:8082/api/users/${member.userId}`);
+            const userResponse = await fetch(`${USER_API_URL}/${member.userId}`);
             if (!userResponse.ok) {
               return {
                 ...member,
@@ -92,7 +107,7 @@ export default function GroupHome() {
             const userData = await userResponse.json();
             return {
               ...member,
-              name: `${userData.firstName || 'Unknown'} ${userData.lastName || 'User'}`, // Concatenate first and last name
+              name: `${userData.firstName || 'Unknown'} ${userData.lastName || 'User'}`,
               email: userData.email || 'unknown@email.com',
               avatar: userData.avatar
             };
@@ -117,12 +132,15 @@ export default function GroupHome() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [planId]);
 
   useEffect(() => {
     fetchGroupData();
-  }, [planId]);
+  }, [fetchGroupData]);
 
+  /**
+   * Handles adding a new member to the group
+   */
   const handleAddMember = async () => {
     if (!newMemberEmail.trim()) {
       Alert.alert('Error', 'Please enter a valid email');
@@ -131,34 +149,30 @@ export default function GroupHome() {
   
     setIsProcessing(true);
     try {
-      // 1. Find user by email
+      // Find user by email
       const userResponse = await fetch(
-        `http://localhost:8082/api/users/email?email=${encodeURIComponent(newMemberEmail)}`
+        `${USER_API_URL}/email?email=${encodeURIComponent(newMemberEmail)}`
       );
       
       if (!userResponse.ok) throw new Error('User not found');
       const userData = await userResponse.json();
   
-      // 2. Log the data before sending
-      const url = new URL('http://localhost:8084/api/saving-members');
+      // Prepare request URL with parameters
+      const url = new URL(`${MEMBER_API_URL}`);
       url.searchParams.append('planId', planId);
       url.searchParams.append('userId', userData.userId);
       url.searchParams.append('role', 'Member');
-      console.log("Final URL:", url.toString());
   
-      // 3. Add user to saving plan
+      // Add user to saving plan
       const response = await fetch(url.toString(), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // Add if your API requires auth:
-          // 'Authorization': `Bearer ${token}`
         },
       });
   
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("Backend error response:", errorData); // Log full error
         throw new Error(errorData.message || 'Failed to add member');
       }
   
@@ -169,13 +183,15 @@ export default function GroupHome() {
       Alert.alert('Success', 'Member added successfully');
   
     } catch (error) {
-      console.error("Full error details:", error); // Log complete error
       Alert.alert('Error', error instanceof Error ? error.message : 'Failed to add member');
     } finally {
       setIsProcessing(false);
     }
   };
 
+  /**
+   * Handles removing a member from the group
+   */
   const handleDeleteMember = async (userId: string) => {
     setIsProcessing(true);
     try {
@@ -185,7 +201,7 @@ export default function GroupHome() {
       );
       
       if (!response.ok) {
-        throw new Error('Failed to delete member');
+        throw new Error('Failed to remove member');
       }
       
       await fetchGroupData();
@@ -199,6 +215,9 @@ export default function GroupHome() {
     }
   };
 
+  /**
+   * Handles changing a member's role
+   */
   const handleChangeRole = async (userId: string, newRole: string) => {
     setIsProcessing(true);
     try {
@@ -234,6 +253,9 @@ export default function GroupHome() {
     setMemberActionModalVisible(true);
   };
 
+  /**
+   * Formats a number as currency
+   */
   const formatCurrency = (amount: number) => {
     return amount.toLocaleString('en-US', {
       style: 'currency',
@@ -243,12 +265,18 @@ export default function GroupHome() {
     });
   };
 
+  /**
+   * Returns gradient colors based on progress value
+   */
   const getProgressColor = (progress: number) => {
-    if (progress < 0.3) return ['#FF416C', '#FF4B2B'];
-    if (progress < 0.7) return ['#F09819', '#EDDE5D'];
-    return ['#56ab2f', '#a8e063'];
+    if (progress < 0.3) return ['#FF416C', '#FF4B2B']; // Red
+    if (progress < 0.7) return ['#F09819', '#EDDE5D']; // Yellow/Orange
+    return ['#56ab2f', '#a8e063']; // Green
   };
 
+  /**
+   * Renders a single member item in the list
+   */
   const renderMemberItem = ({ item }: { item: Member }) => (
     <TouchableOpacity 
       style={styles.memberCard}
@@ -261,49 +289,16 @@ export default function GroupHome() {
       />
       <View style={styles.memberInfo}>
         <Text style={styles.memberName}>
-          {item.name} {item.role === 'ADMIN' && 
-            <Text style={styles.adminBadge}>Admin</Text>
-          }
+          {item.name} 
+          {item.role === 'ADMIN' && <Text style={styles.adminBadge}> Admin</Text>}
         </Text>
         <Text style={styles.memberEmail}>{item.email}</Text>
       </View>
       <Icon name="chevron-right" size={24} color="#bbb" />
     </TouchableOpacity>
   );
-  const logMemberDetails = async (member: Member) => {
-    try {
-      console.log('--- MEMBER DETAILS ---');
-      console.log('Basic Member Info:', {
-        id: member.id,
-        planId: member.planId,
-        role: member.role,
-        //joinedAt: member.createdAt // Add if available
-      });
-  
-      // Fetch fresh user data (in case it changed)
-      const userResponse = await fetch(`http://localhost:8082/api/users/${member.userId}`);
-      if (!userResponse.ok) throw new Error('Failed to fetch user details');
-      
-      const userData = await userResponse.json();
-      console.log('User Profile Info:', {
-        userId: member.userId,
-        name: userData.name,
-        email: userData.email,
-        avatar: userData.avatar,
-        // Add any other user fields you want to log
-        ...(userData.phone && { phone: userData.phone }),
-        ...(userData.createdAt && { registeredAt: userData.createdAt })
-      });
-  
-      console.log('Full Combined Data:', {
-        ...member,
-        userDetails: userData
-      });
-    } catch (error) {
-      console.error('Error logging member details:', error);
-    }
-  };
 
+  // Loading state
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -313,6 +308,7 @@ export default function GroupHome() {
     );
   }
 
+  // Error state
   if (error || !groupData) {
     return (
       <View style={styles.errorContainer}>
@@ -328,6 +324,7 @@ export default function GroupHome() {
     );
   }
 
+  // Calculate progress and days left
   const progressPercentage = (groupData.currentAmount / groupData.targetAmount) * 100;
   const progressColors = getProgressColor(progressPercentage / 100);
   const timeLeft = new Date(groupData.endDate).getTime() - new Date().getTime();
@@ -398,7 +395,8 @@ export default function GroupHome() {
         
         <TouchableOpacity 
           style={styles.quickActionButton}
-          onPress={() => { /* Navigate to contribution page */ }}
+          onPress={() => navigation.navigate('Contribute', { planId })}
+      
         >
           <View style={[styles.actionIcon, {backgroundColor: '#2ecc71'}]}>
             <Icon name="attach-money" size={20} color="white" />
@@ -439,12 +437,12 @@ export default function GroupHome() {
 
       {/* Action Button */}
       <TouchableOpacity 
-        style={[styles.deleteButton]}
+        style={styles.deleteButton}
         onPress={() => navigation.navigate('GroupDelete', { planId })}
         disabled={isProcessing}
       >
         <Icon name="delete" size={20} color="white" />
-        <Text style={[styles.buttonText]}>Delete Group</Text>
+        <Text style={styles.buttonText}>Delete Group</Text>
       </TouchableOpacity>
 
       {/* Invite Member Modal */}
@@ -544,7 +542,7 @@ export default function GroupHome() {
                         disabled={isProcessing}
                       >
                         <Icon name="star" size={24} color="#f39c12" />
-                        <Text style={styles.actionOptionText}>Make Admin</Text>
+                        <Text style={styles.actionOptionText}>View Profile</Text>
                       </TouchableOpacity>
                       
                       <TouchableOpacity 
@@ -580,68 +578,39 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8f9fa',
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  loadingText: {
-    marginTop: 10,
-    color: '#666',
-    fontSize: 16,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  errorText: {
-    color: '#e74c3c',
-    fontSize: 18,
-    marginVertical: 20,
-    textAlign: 'center',
-  },
-  retryButton: {
-    backgroundColor: '#4a86e8',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
   header: {
-    padding: 24,
-    paddingTop: 48,
+    paddingVertical: 24,
+    paddingHorizontal: 16,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
-    marginBottom: 16,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: 24,
+    fontWeight: '700',
     color: 'white',
-    marginBottom: 20,
+    marginBottom: 16,
     textAlign: 'center',
   },
   progressCard: {
     backgroundColor: 'white',
-    borderRadius: 16,
+    borderRadius: 12,
     padding: 16,
+    marginTop: 8,
+    elevation: 2,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
+    shadowRadius: 2,
   },
   amountRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    alignItems: 'center',
   },
   amountBlock: {
     flex: 1,
@@ -649,29 +618,29 @@ const styles = StyleSheet.create({
   },
   amountDivider: {
     width: 1,
-    backgroundColor: '#eee',
-    marginHorizontal: 8,
+    height: 40,
+    backgroundColor: '#e0e0e0',
   },
   amountLabel: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#666',
     marginBottom: 4,
   },
   amountValue: {
-    fontSize: 22,
-    fontWeight: 'bold',
+    fontSize: 20,
+    fontWeight: '700',
     color: '#333',
   },
   progressBarContainer: {
-    height: 12,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 6,
+    height: 8,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 4,
+    marginVertical: 16,
     overflow: 'hidden',
-    marginBottom: 12,
   },
   progressFill: {
     height: '100%',
-    borderRadius: 6,
+    borderRadius: 4,
   },
   progressDetails: {
     flexDirection: 'row',
@@ -688,43 +657,45 @@ const styles = StyleSheet.create({
   },
   quickActions: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    marginBottom: 24,
+    justifyContent: 'space-around',
+    paddingVertical: 16,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    marginHorizontal: 16,
+    marginTop: -16,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   quickActionButton: {
     alignItems: 'center',
-    width: width / 3 - 20,
   },
   actionIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
   },
   quickActionText: {
     fontSize: 12,
-    fontWeight: '500',
     color: '#333',
+    fontWeight: '600',
   },
   section: {
-    marginHorizontal: 16,
-    marginBottom: 24,
     backgroundColor: 'white',
-    borderRadius: 16,
+    borderRadius: 12,
+    marginHorizontal: 16,
+    marginTop: 24,
     padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
     elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -733,32 +704,23 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 16,
+    fontWeight: '700',
     color: '#333',
   },
   addMemberButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#4a86e8',
-    paddingVertical: 6,
     paddingHorizontal: 12,
-    borderRadius: 20,
+    paddingVertical: 6,
+    borderRadius: 16,
   },
   addMemberText: {
     color: 'white',
-    fontWeight: '500',
     fontSize: 12,
+    fontWeight: '600',
     marginLeft: 4,
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    paddingVertical: 24,
-  },
-  emptyText: {
-    textAlign: 'center',
-    color: '#666',
-    marginTop: 12,
   },
   memberCard: {
     flexDirection: 'row',
@@ -768,110 +730,116 @@ const styles = StyleSheet.create({
     borderBottomColor: '#f0f0f0',
   },
   avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 16,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 12,
   },
   memberInfo: {
     flex: 1,
   },
   memberName: {
     fontSize: 16,
+    fontWeight: '600',
     color: '#333',
-    fontWeight: '500',
-    marginBottom: 4,
-  },
-  adminBadge: {
-    fontSize: 12,
-    color: '#f39c12',
-    fontWeight: 'bold',
   },
   memberEmail: {
     fontSize: 14,
-    color: '#777',
+    color: '#666',
   },
-  deleteButton: {
-    flexDirection: 'row',
+  adminBadge: {
+    color: '#f39c12',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  emptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',
+    paddingVertical: 32,
+  },
+  emptyText: {
+    marginTop: 8,
+    color: '#999',
+    fontSize: 14,
+  },
+  deleteButton: {
     backgroundColor: '#e74c3c',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
     borderRadius: 12,
-    paddingVertical: 16,
+    paddingVertical: 14,
     marginHorizontal: 16,
-    marginBottom: 32,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    marginVertical: 24,
     elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   buttonText: {
-    fontSize: 16,
-    fontWeight: '600',
     color: 'white',
+    fontWeight: '600',
+    fontSize: 16,
     marginLeft: 8,
   },
   modalOverlay: {
     flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
-    width: '85%',
     backgroundColor: 'white',
     borderRadius: 16,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
+    width: width * 0.85,
+    padding: 24,
     elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    marginBottom: 16,
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '700',
     color: '#333',
   },
   modalBody: {
-    padding: 16,
+    marginBottom: 24,
   },
   inputLabel: {
     fontSize: 14,
-    fontWeight: '500',
-    color: '#555',
+    color: '#666',
     marginBottom: 8,
   },
   input: {
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
-    padding: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     fontSize: 16,
-    backgroundColor: '#f9f9f9',
   },
   modalButton: {
     backgroundColor: '#4a86e8',
-    padding: 16,
+    borderRadius: 8,
+    paddingVertical: 12,
     alignItems: 'center',
-    marginTop: 16,
-  },
-  disabledButton: {
-    backgroundColor: '#a0c0e8',
   },
   modalButtonText: {
+    color: 'white',
     fontSize: 16,
     fontWeight: '600',
-    color: 'white',
+  },
+  disabledButton: {
+    backgroundColor: '#aaa',
   },
   actionSheet: {
     position: 'absolute',
@@ -879,30 +847,30 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     backgroundColor: 'white',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingBottom: 24,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    padding: 16,
+    paddingBottom: 32,
   },
   actionSheetHandle: {
     width: 40,
-    height: 5,
-    backgroundColor: '#ddd',
-    borderRadius: 3,
-    marginVertical: 12,
+    height: 4,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 2,
     alignSelf: 'center',
+    marginBottom: 16,
   },
   selectedMemberHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingBottom: 16,
+    paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
   selectedMemberAvatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     marginRight: 16,
   },
   selectedMemberName: {
@@ -912,17 +880,15 @@ const styles = StyleSheet.create({
   },
   selectedMemberEmail: {
     fontSize: 14,
-    color: '#777',
-    marginTop: 4,
+    color: '#666',
   },
   actionOptions: {
-    paddingVertical: 12,
+    marginTop: 16,
   },
   actionOption: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 20,
+    paddingVertical: 12,
   },
   actionOptionText: {
     fontSize: 16,
@@ -930,15 +896,50 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   closeActionSheet: {
-    paddingVertical: 16,
-    alignItems: 'center',
     borderTopWidth: 1,
     borderTopColor: '#f0f0f0',
-    marginTop: 8,
+    paddingTop: 16,
+    marginTop: 16,
+    alignItems: 'center',
   },
   closeActionSheetText: {
     fontSize: 16,
-    color: '#999',
-    fontWeight: '500',
+    color: '#4a86e8',
+    fontWeight: '600',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#666',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+    padding: 16,
+  },
+  errorText: {
+    fontSize: 18,
+    color: '#e74c3c',
+    marginVertical: 16,
+    textAlign: 'center',
+  },
+  retryButton: {
+    backgroundColor: '#4a86e8',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

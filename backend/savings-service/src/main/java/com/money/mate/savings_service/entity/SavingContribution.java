@@ -2,7 +2,8 @@ package com.money.mate.savings_service.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.util.Date;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
@@ -23,11 +24,12 @@ public class SavingContribution {
     @Column(nullable = false)
     private UUID userId;
 
-    @Column(nullable = false)
-    private double amount;
+    @Column(nullable = false, precision = 19, scale = 2)
+    private BigDecimal amount;
 
-    @Temporal(TemporalType.TIMESTAMP)
+    @Column(length = 500)
+    private String note;
+
     @Column(nullable = false, updatable = false)
-    private Date contributionDate = new Date();
+    private LocalDateTime contributionDate = LocalDateTime.now();
 }
- 

@@ -11,6 +11,8 @@ import {GroupMemberRemove} from '../screens/GroupSaving/groupModify';
 import {SetRule} from '../screens/GroupSaving/groupModify';
 import {GroupDelete} from '../screens/GroupSaving/groupModify';
 import {SetGoal} from '../screens/GroupSaving/groupModify';
+import Contribute from "../screens/GroupSaving/groupContribution";
+import ProfileScreen from "../screens/profile/Profile";
 export type GroupSavingStackParamList = {
   GroupSavingHome: undefined;
   PlanDetails:{planId:string};
@@ -22,6 +24,8 @@ export type GroupSavingStackParamList = {
   SetRule:{planId:string};
   GroupDelete:{planId:string};
   SetGoal:{planId:string};
+  Contribute:{planId:string};
+  Profile:undefined;
   
 };
 
@@ -38,6 +42,8 @@ export default function GroupSavingNavigator() {
       <GroupSavingStack.Screen name="SetRule" component={SetRule} />
       <GroupSavingStack.Screen name="GroupDelete" component={GroupDelete} />
       <GroupSavingStack.Screen name="SetGoal" component={SetGoal} />
+      <GroupSavingStack.Screen name="Contribute" component={Contribute} />
+      <GroupSavingStack.Screen name="Profile" component={ProfileScreen} />
     </GroupSavingStack.Navigator>
   );
 }

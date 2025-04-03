@@ -29,4 +29,5 @@ public class SavingPlanService {
     public void deletePlan(UUID planId) {
         savingPlanRepository.deleteById(planId);
     }
+
 }

@@ -2,9 +2,10 @@ package com.money.mate.savings_service.repository;
 
 import com.money.mate.savings_service.entity.SavingContribution;
 import org.springframework.data.jpa.repository.JpaRepository;
-import java.util.List;
+import org.springframework.stereotype.Repository;
+
 import java.util.UUID;
 
+@Repository
 public interface SavingContributionRepository extends JpaRepository<SavingContribution, UUID> {
-    List<SavingContribution> findByPlanId(UUID planId);
 }
