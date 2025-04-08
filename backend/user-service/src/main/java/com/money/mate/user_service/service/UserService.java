@@ -90,6 +90,19 @@ public class UserService {
         // Save the updated user object
         return userRepository.save(existingUser);
     }
+    public User updateManualTradingBalance(UUID userId, double amount) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        
+        double newBalance = user.getManualTradingBalance() + amount;
+        if (newBalance < 0) {
+            throw new IllegalArgumentException("Insufficient manual trading balance");
+        }
+        
+        user.setManualTradingBalance(newBalance);
+        return userRepository.save(user);
+    }
+    
 
     public User createUser(User user) {
         // Hash the password before saving it
