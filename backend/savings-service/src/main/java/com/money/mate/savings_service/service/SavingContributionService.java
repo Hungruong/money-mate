@@ -14,7 +14,7 @@ public class SavingContributionService {
 
     @Autowired
     private SavingContributionRepository repository;
-    private SavingPlanService savingPlanService;
+
     public SavingContribution createContribution(SavingContribution contribution) {
         return repository.save(contribution);
     }

@@ -90,7 +90,7 @@ export default function Contribute() {
       setAmount('');
       setNote('');
 
-      updatePlanAmount(parseFloat(amount));
+      
 
       navigation.goBack();
       
