@@ -24,6 +24,7 @@ const API_BASE_URL = 'http://localhost:8084/api';
 const USER_API_URL = 'http://localhost:8082/api/users';
 const SAVING_API_URL = `${API_BASE_URL}/saving-plans`;
 const MEMBER_API_URL = `${API_BASE_URL}/saving-members`;
+const CONTRIBUTION_API_URL = `${API_BASE_URL}/contributions`;
 const { width } = Dimensions.get('window');
 
 // Types
@@ -55,6 +56,19 @@ interface GroupData {
 interface ProgressBarProps {
   progress: number;
 }
+interface Contribution {
+  contributionId: string;
+  planId: string;
+  userId: string;
+  amount: string;
+  note?: string;
+  user?:{
+    firstName:string;
+    lastName:string;
+    avatar?:string;
+  }
+}
+
 
 /**
  * GroupHome component - Displays detailed information about a group saving plan
@@ -73,7 +87,7 @@ export default function GroupHome() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [memberActionModalVisible, setMemberActionModalVisible] = useState(false);
-
+  const [contributions, setContributions] = useState<Contribution[]>([]);
   /**
    * Fetches group data and member information
    */
@@ -121,10 +135,38 @@ export default function GroupHome() {
         })
       );
       
+      //Fetch plan's all contributions
+      const contributionsResponse = await fetch(`${CONTRIBUTION_API_URL}/plan/${planId}`);
+      if (!contributionsResponse.ok) throw new Error('Failed to fetch contributions');
+      //const contributionsData = await contributionsResponse.json();
+      let contributionsData = await contributionsResponse.json();
+      contributionsData = await Promise.all(
+        contributionsData.map(async (contribution: any) => {
+          try {
+            const userResponse = await fetch(`${USER_API_URL}/${contribution.userId}`);
+            if (!userResponse.ok) {
+              return contribution;
+            }
+            const userData = await userResponse.json();
+            return {
+              ...contribution,
+              user: {
+                firstName: userData.firstName,
+                lastName: userData.lastName,
+                avatar: userData.avatar
+              }
+            };
+          } catch (error) {
+            return contribution;
+          }
+        })
+      );
+
       setGroupData({
         ...groupData,
         members: membersWithDetails
       });
+      setContributions(contributionsData);
       
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Unknown error');
@@ -188,6 +230,8 @@ export default function GroupHome() {
       setIsProcessing(false);
     }
   };
+
+
 
   /**
    * Handles removing a member from the group
@@ -264,6 +308,7 @@ export default function GroupHome() {
       maximumFractionDigits: 0
     });
   };
+
 
   /**
    * Returns gradient colors based on progress value
@@ -370,6 +415,41 @@ export default function GroupHome() {
           </View>
         </View>
       </LinearGradient>
+
+      {/* Contributions List */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>List of Contributions</Text>
+        {contributions.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Icon name="attach-money" size={40} color="#ccc" />
+            <Text style={styles.emptyText}>No contributions yet</Text>
+          </View>
+        ) : (
+        <FlatList
+          data={contributions}
+          keyExtractor={(item) => item.contributionId}
+          renderItem={({ item }) => (
+            <View style={styles.contributionCard}>
+              <View style={styles.contributionHeader}>
+                <Image 
+                  style={styles.contributionAvatar} 
+                  source={item.user?.avatar ? { uri: item.user.avatar } : require("../../../assets/images/icon.png")} 
+                />
+                <Text style={styles.contributionUser}>
+                  {item.user ? `${item.user.firstName} ${item.user.lastName}` : 'Unknown User'}
+                </Text>
+              </View>
+              <View style={styles.contributionDetails}>
+                <Text style={styles.contributionAmount}>Amount: ${item.amount}</Text>
+                {item.note && (
+                  <Text style={styles.contributionNote}>Note: {item.note}</Text>
+                )}
+              </View>
+            </View>
+          )}
+        />
+        )}
+      </View>
 
       {/* Quick Actions */}
       <View style={styles.quickActions}>
@@ -942,4 +1022,62 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  listItemCard: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  contributionText: {
+    fontSize: 14,
+    color: '#333',
+  },
+  section: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    marginHorizontal: 16,
+    marginTop: 24,
+    padding: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  contributionCard: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 8,
+  },
+  contributionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  contributionAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    marginRight: 8,
+  },
+  contributionUser: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+  },
+  contributionDetails: {
+    marginLeft: 40, // To align with avatar
+  },
+  contributionAmount: {
+    fontSize: 14,
+    color: '#333',
+  },
+  contributionNote: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 4,
+    fontStyle: 'italic',
+  },
+
+  
 });

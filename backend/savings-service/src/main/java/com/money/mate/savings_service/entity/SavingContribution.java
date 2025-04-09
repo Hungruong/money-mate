@@ -32,4 +32,5 @@ public class SavingContribution {
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime contributionDate = LocalDateTime.now();
+
 }

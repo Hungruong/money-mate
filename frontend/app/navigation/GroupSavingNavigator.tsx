@@ -13,6 +13,7 @@ import {GroupDelete} from '../screens/GroupSaving/groupModify';
 import {SetGoal} from '../screens/GroupSaving/groupModify';
 import Contribute from "../screens/GroupSaving/groupContribution";
 import ProfileScreen from "../screens/profile/Profile";
+import MemberProfile from "../screens/GroupSaving/groupMemberProfile";
 export type GroupSavingStackParamList = {
   GroupSavingHome: undefined;
   PlanDetails:{planId:string};
@@ -26,6 +27,7 @@ export type GroupSavingStackParamList = {
   SetGoal:{planId:string};
   Contribute:{planId:string};
   Profile:undefined;
+  MemberProfile:{planId: string,userId:string}
   
 };
 
@@ -44,6 +46,8 @@ export default function GroupSavingNavigator() {
       <GroupSavingStack.Screen name="SetGoal" component={SetGoal} />
       <GroupSavingStack.Screen name="Contribute" component={Contribute} />
       <GroupSavingStack.Screen name="Profile" component={ProfileScreen} />
+      <GroupSavingStack.Screen name="MemberProfile" component={MemberProfile} />
+
     </GroupSavingStack.Navigator>
   );
 }

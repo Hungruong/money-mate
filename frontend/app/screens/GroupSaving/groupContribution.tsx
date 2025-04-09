@@ -15,12 +15,12 @@ import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import axios from 'axios';
 import { GroupSavingStackParamList } from "@/app/navigation/GroupSavingNavigator";
+
 type GroupHomeScreenRouteProp = RouteProp<GroupSavingStackParamList, 'GroupHome'>;
-// Types
+
 type ContributeStackParamList = {
   GroupHome: undefined;
-  Contribute: undefined;
-  
+  Contribute: { refreshContributions: () => void };
 };
 
 type ContributeScreenNavigationProp = StackNavigationProp<
@@ -28,7 +28,6 @@ type ContributeScreenNavigationProp = StackNavigationProp<
   'Contribute'
 >;
 
-// Color Palette
 const COLORS = {
   primary: '#4f46e5',
   primaryGradient: ['#4f46e5', '#6366f1'],
@@ -55,7 +54,7 @@ const COLORS = {
 export default function Contribute() {
   const navigation = useNavigation<ContributeScreenNavigationProp>();
   const route = useRoute<GroupHomeScreenRouteProp>();
-  const { planId } = route.params;
+  const { planId } = route.params; // Getting planId from route parameters
   const [amount, setAmount] = useState<string>('');
   const [note, setNote] = useState<string>('');
 
@@ -73,21 +72,28 @@ export default function Contribute() {
       return;
     }
 
+    const userId = '122e4567-e89b-12d3-a456-426614174000'; // Replace with actual user ID
+
     try {
       const response = await axios.post('http://localhost:8084/api/contributions', {
-        planId, // Replace with actual plan ID
-        userId: '122e4567-e89b-12d3-a456-426614174000',   // Replace with actual user ID
+        planId,
+        userId,
         amount: parseFloat(amount),
-        note: note,
+        note,
       });
 
       console.log('Contribution submitted:', response.data);
       alert(`Contribution of $${amount} submitted!`);
+
       
       // Reset form and navigate back
       setAmount('');
       setNote('');
+
+      updatePlanAmount(parseFloat(amount));
+
       navigation.goBack();
+      
     } catch (error) {
       console.error('Error submitting contribution:', error);
       alert('Failed to submit contribution. Please try again.');
@@ -305,3 +311,5 @@ const styles = StyleSheet.create({
     color: COLORS.text.secondary,
   },
 });
+
+

@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -18,20 +18,34 @@ public class SavingContributionController {
 
     @PostMapping
     public ResponseEntity<SavingContribution> createContribution(@RequestBody SavingContribution contribution) {
-        SavingContribution createdContribution = service.createContribution(contribution);
-        return ResponseEntity.ok(createdContribution);
+        SavingContribution created = service.createContribution(contribution);
+        return ResponseEntity.ok(created);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<SavingContribution> getContribution(@PathVariable UUID id) {
-        Optional<SavingContribution> contribution = service.getContribution(id);
-        return contribution.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        return service.getContribution(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteContribution(@PathVariable UUID id) {
-        service.deleteContribution(id);
-        return ResponseEntity.noContent().build();
+    @GetMapping
+    public ResponseEntity<List<SavingContribution>> listContributions() {
+        List<SavingContribution> contributions = service.listContributions();
+        return ResponseEntity.ok(contributions);
+    }
+
+    @GetMapping("/plan/{planId}")
+    public ResponseEntity<List<SavingContribution>> listByPlanId(@PathVariable UUID planId) {
+        List<SavingContribution> contributions = service.listByPlanId(planId);
+        return ResponseEntity.ok(contributions);
+    }
+
+    @GetMapping("/plan/{planId}/user/{userId}")
+    public ResponseEntity<List<SavingContribution>> listByPlanIdAndUserId(
+            @PathVariable UUID planId, 
+            @PathVariable UUID userId) {
+        List<SavingContribution> contributions = service.listByPlanIdAndUserId(planId, userId);
+        return ResponseEntity.ok(contributions);
     }
 }

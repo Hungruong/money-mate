@@ -2,13 +2,15 @@ package com.money.mate.savings_service.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
-@Getter
-@Setter
+
 @NoArgsConstructor
-@AllArgsConstructor
+
 @Entity
 @Table(name = "saving_plans")
 public class SavingPlan {
@@ -43,4 +45,7 @@ public class SavingPlan {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false, updatable = false)
     private Date createdAt = new Date();
+
+
+
 }

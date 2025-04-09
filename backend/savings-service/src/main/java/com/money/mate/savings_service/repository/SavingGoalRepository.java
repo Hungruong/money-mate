@@ -10,10 +10,5 @@ import com.money.mate.savings_service.entity.SavingGoal;
 
 @Repository
 public interface SavingGoalRepository extends JpaRepository<SavingGoal,UUID> {
-    //Create rules
-    //Read rules
-    //Update rules
-    //Delete rules
-    
 
 }
