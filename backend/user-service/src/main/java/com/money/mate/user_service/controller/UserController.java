@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
+record UpdateUserRequest(UUID userId, double amount) {}
+
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/users")
@@ -19,9 +21,7 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<User> createUser(@RequestBody User user) {
-        System.out.println("Received request to create user: " + user);
         User createdUser = userService.createUser(user);
-        System.out.println("Created user: " + createdUser);
         return ResponseEntity.ok(createdUser);
     }
 
@@ -55,6 +55,20 @@ public class UserController {
         return ResponseEntity.ok(userService.updateUser(userId, updatedUser));
     }
 
+    @PutMapping("/{userId}/manual-trading-balance")
+    public ResponseEntity<User> updateManualTradingBalance(
+            @PathVariable UUID userId,
+            @RequestBody UpdateUserRequest updateRequest) {
+        return ResponseEntity.ok(userService.updateManualTradingBalance(userId, updateRequest.amount()));
+    }
+
+    @PutMapping("/{userId}/auto-trading-balance")
+    public ResponseEntity<User> updateAutoTradingBalance(
+            @PathVariable UUID userId,
+            @RequestBody UpdateUserRequest updateRequest) {
+        return ResponseEntity.ok(userService.updateAutoTradingBalance(userId, updateRequest.amount()));
+            }
+
     @PutMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request) {
         try {
@@ -63,7 +77,7 @@ public class UserController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
-            e.printStackTrace(); // Log the error details to the console
+            e.printStackTrace();
             return ResponseEntity.status(500).body("An error occurred while updating the password");
         }
     }

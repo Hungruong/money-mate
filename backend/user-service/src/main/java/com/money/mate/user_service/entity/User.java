@@ -12,7 +12,6 @@ import java.util.Date;
 @Entity
 @Table(name = "users")
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID userId;
@@ -24,13 +23,13 @@ public class User {
     private String email;
 
     @Column(length = 100, nullable = false)
-    private String userName; 
+    private String userName;
 
     @Column(length = 50)
-    private String firstName; 
+    private String firstName;
 
     @Column(length = 50)
-    private String lastName; 
+    private String lastName;
 
     @Column(length = 20)
     private String phoneNumber;

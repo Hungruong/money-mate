@@ -90,6 +90,31 @@ public class UserService {
         // Save the updated user object
         return userRepository.save(existingUser);
     }
+    public User updateManualTradingBalance(UUID userId, double amount) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        
+        double newBalance = user.getManualTradingBalance() + amount;
+        if (newBalance < 0) {
+            throw new IllegalArgumentException("Insufficient manual trading balance");
+        }
+        
+        user.setManualTradingBalance(newBalance);
+        return userRepository.save(user);
+    }
+
+    // Update auto-trading balance
+    public User updateAutoTradingBalance(UUID userId, double amount) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+        double newBalance = user.getAutoTradingBalance() + amount;
+        if (newBalance < 0) {
+            throw new IllegalStateException("Insufficient auto-trading balance for user: " + userId);
+        }
+        user.setAutoTradingBalance(newBalance);
+        return userRepository.save(user);
+    }
+
 
     public User createUser(User user) {
         // Hash the password before saving it
