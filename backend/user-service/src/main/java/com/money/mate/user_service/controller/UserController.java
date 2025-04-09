@@ -62,6 +62,13 @@ public class UserController {
         return ResponseEntity.ok(userService.updateManualTradingBalance(userId, updateRequest.amount()));
     }
 
+    @PutMapping("/{userId}/auto-trading-balance")
+    public ResponseEntity<User> updateAutoTradingBalance(
+            @PathVariable UUID userId,
+            @RequestBody UpdateUserRequest updateRequest) {
+        return ResponseEntity.ok(userService.updateAutoTradingBalance(userId, updateRequest.amount()));
+            }
+
     @PutMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request) {
         try {
