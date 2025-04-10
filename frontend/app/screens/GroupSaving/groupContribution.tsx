@@ -72,14 +72,16 @@ export default function Contribute() {
       return;
     }
 
-    const userId = '122e4567-e89b-12d3-a456-426614174000'; // Replace with actual user ID
+    //const userId = '122e4567-e89b-12d3-a456-426614174000'; // Replace with actual user ID
 
     try {
-      const response = await axios.post('http://localhost:8084/api/contributions', {
-        planId,
-        userId,
-        amount: parseFloat(amount),
-        note,
+      const response = await axios.post('http://localhost:8084/api/contributions',null, {
+        params: {
+          planId,
+          userId:'122e4567-e89b-12d3-a456-426614174000',
+          amount: parseFloat(amount),
+          note,
+        },
       });
 
       console.log('Contribution submitted:', response.data);

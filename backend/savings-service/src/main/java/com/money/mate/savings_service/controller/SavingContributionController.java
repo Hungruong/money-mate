@@ -5,9 +5,12 @@ import com.money.mate.savings_service.service.SavingContributionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.http.HttpStatus;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
+
+
 
 @RestController
 @RequestMapping("/api/contributions")
@@ -16,11 +19,11 @@ public class SavingContributionController {
     @Autowired
     private SavingContributionService service;
 
-    @PostMapping
-    public ResponseEntity<SavingContribution> createContribution(@RequestBody SavingContribution contribution) {
-        SavingContribution created = service.createContribution(contribution);
-        return ResponseEntity.ok(created);
-    }
+    //@PostMapping
+    //public ResponseEntity<SavingContribution> createContribution(@RequestBody SavingContribution contribution) {
+        //SavingContribution created = service.createContribution(contribution);
+        //return ResponseEntity.ok(created);
+    //}
 
     @GetMapping("/{id}")
     public ResponseEntity<SavingContribution> getContribution(@PathVariable UUID id) {
@@ -47,5 +50,15 @@ public class SavingContributionController {
             @PathVariable UUID userId) {
         List<SavingContribution> contributions = service.listByPlanIdAndUserId(planId, userId);
         return ResponseEntity.ok(contributions);
+    }
+    @PostMapping
+    public ResponseEntity<SavingContribution> makeContribution(
+            @RequestParam UUID planId,
+            @RequestParam UUID userId,
+            @RequestParam BigDecimal amount,
+            @RequestParam(required = false) String note) {
+
+        SavingContribution contribution = service.makeContribution(planId, userId, amount, note);
+        return new ResponseEntity<>(contribution, HttpStatus.CREATED);
     }
 }
