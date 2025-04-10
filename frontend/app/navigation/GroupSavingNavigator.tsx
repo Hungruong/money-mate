@@ -37,6 +37,7 @@ export default function GroupSavingNavigator() {
   return (
     <GroupSavingStack.Navigator>
       <GroupSavingStack.Screen name="GroupSavingHome" component={GroupSavingScreen} />
+      
       <GroupSavingStack.Screen name="GroupCreate" component={GroupCreate} />
       <GroupSavingStack.Screen name="GroupHome" component={GroupHome} />
       <GroupSavingStack.Screen name="GroupMemProfile" component={GroupMemProfile} />
