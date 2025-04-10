@@ -54,7 +54,7 @@ const COLORS = {
 export default function Contribute() {
   const navigation = useNavigation<ContributeScreenNavigationProp>();
   const route = useRoute<GroupHomeScreenRouteProp>();
-  const { planId } = route.params; // Getting planId from route parameters
+  const { planId, refreshContributions } = route.params; // Getting planId from route parameters
   const [amount, setAmount] = useState<string>('');
   const [note, setNote] = useState<string>('');
 
@@ -93,7 +93,7 @@ export default function Contribute() {
       setNote('');
 
       
-
+      refreshContributions();
       navigation.goBack();
       
     } catch (error) {

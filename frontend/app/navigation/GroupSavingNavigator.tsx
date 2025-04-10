@@ -25,7 +25,7 @@ export type GroupSavingStackParamList = {
   SetRule:{planId:string};
   GroupDelete:{planId:string};
   SetGoal:{planId:string};
-  Contribute:{planId:string};
+  Contribute:{planId:string, refreshContribution?:()=>Promise<void>};
   Profile:undefined;
   MemberProfile:{planId: string,userId:string}
   

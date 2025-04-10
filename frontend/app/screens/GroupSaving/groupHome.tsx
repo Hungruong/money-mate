@@ -475,7 +475,7 @@ export default function GroupHome() {
         
         <TouchableOpacity 
           style={styles.quickActionButton}
-          onPress={() => navigation.navigate('Contribute', { planId })}
+          onPress={() => navigation.navigate('Contribute', { planId, refreshContributions: fetchGroupData })}
       
         >
           <View style={[styles.actionIcon, {backgroundColor: '#2ecc71'}]}>
