@@ -8,13 +8,10 @@ import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -53,9 +50,17 @@ public class PaymentService {
         return new PaymentIntentResponse(paymentIntent.getClientSecret(), paymentIntent.getStatus());
     }
 
-    public PaymentIntentResponse getPaymentIntent(String paymentIntentId) throws StripeException {
-        PaymentIntent intent = PaymentIntent.retrieve(paymentIntentId);
-        return new PaymentIntentResponse(intent.getClientSecret(), intent.getStatus());
+    public PaymentIntentResponse getPaymentIntent(String id) throws StripeException {
+        PaymentIntent intent = PaymentIntent.retrieve(id);
+        return new PaymentIntentResponse(
+            intent.getClientSecret(),
+            intent.getStatus(),
+            intent.getAmount(),
+            intent.getCurrency(),
+            intent.getDescription(),
+            intent.getPaymentMethod(),
+            intent.getPaymentMethodTypes().toArray(new String[0]), // Convert List<String> to String[]
+            intent.getId() // Provide the id
+        );
     }
 }
-
