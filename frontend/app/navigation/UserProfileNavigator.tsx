@@ -3,13 +3,15 @@ import ProfileScreen from '../screens/profile/Profile';
 import EditProfileScreen from '../screens/profile/EditProfile';
 import ChangePassword from '../screens/profile/ChangePassword';
 import HomeScreen from '../screens/home';
+import StripePaymentForm from '../screens/profile/Payment';
 
 type RootStackParamList = {
   Profile: undefined;
   EditProfile: undefined;
   ChangePassword: undefined;
   Auth: undefined;
-  HomeScreen: undefined; // Add the "HomeScreen" key to the type
+  HomeScreen: undefined;
+  Payment: undefined; // Add the "Payments" key to the type
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -21,6 +23,7 @@ const AppNavigator = () => {
        <Stack.Screen name="EditProfile" component={EditProfileScreen} />
        <Stack.Screen name="ChangePassword" component={ChangePassword} />
        <Stack.Screen name="HomeScreen" component={HomeScreen} /> 
+       <Stack.Screen name="Payment" component={StripePaymentForm} />
      </Stack.Navigator>
  );
 };

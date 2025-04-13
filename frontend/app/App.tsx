@@ -5,6 +5,7 @@ import AuthNavigator from "./navigation/AuthNavigator";
 import BottomTabNavigator from "./navigation/BottomTabNavigator";
 
 
+
 const RootStack = createStackNavigator();
 
 function RootNavigator() {

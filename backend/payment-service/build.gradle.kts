@@ -35,6 +35,7 @@ dependencies {
 	testImplementation("org.springframework.security:spring-security-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	implementation ("com.stripe:stripe-java:24.4.0")
+
 }
 
 tasks.withType<Test> {

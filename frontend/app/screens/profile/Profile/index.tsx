@@ -23,6 +23,7 @@ type RootStackParamList = {
   GroupSaving: undefined;
   HomeScreen: undefined;
   ChangePassword: undefined;
+  Payment: undefined; // Added Payment route
 };
 
 const API_URL = "http://localhost:8082/api/users"; // Updated API URL
@@ -108,6 +109,11 @@ const ProfileScreen = ({ navigation }: ProfileScreenProps) => {
       title: 'Investment',
       icon: require('../../../../assets/images/investment.png'),
       onPress: () => navigation.navigate('Trading')
+    },
+    {
+      title: 'Payment',
+      icon: require('../../../../assets/images/spending.png'), // Reusing an existing icon - replace with a payment-specific icon if available
+      onPress: () => navigation.navigate('Payment')
     }
   ];
 
