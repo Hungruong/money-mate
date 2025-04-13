@@ -515,24 +515,12 @@ export function SetGoal() {
           />
           
           <Text style={styles.formLabel}>Deadline</Text>
-          <TouchableOpacity 
-            style={styles.datePickerButton}
-            onPress={() => setShowDatePicker(true)}
-          >
-            <Text style={styles.datePickerButtonText}>
-              {newGoal.deadline || 'Select a deadline'}
-            </Text>
-          </TouchableOpacity>
-          
-          {showDatePicker && (
-            <DateTimePicker
-              value={newGoal.deadline ? new Date(newGoal.deadline) : new Date()}
-              mode="date"
-              display="default"
-              onChange={handleDateChange}
-              minimumDate={new Date()}
+            <TextInput
+              placeholder="YYYY-MM-DD"
+              value={newGoal.deadline}
+              onChangeText={(text) => setNewGoal({ ...newGoal, deadline: text })}
+              style={styles.textInput}
             />
-          )}
           
           <Text style={styles.formLabel}>Description</Text>
           <TextInput

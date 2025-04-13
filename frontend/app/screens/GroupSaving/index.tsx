@@ -6,14 +6,12 @@ import {
   StyleSheet,
   FlatList,
   ActivityIndicator,
-  Dimensions,
+  useWindowDimensions,
   SafeAreaView,
   StatusBar,
-  Image,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useNavigation } from '@react-navigation/native';
-import { Picker } from '@react-native-picker/picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -35,14 +33,13 @@ export interface SavingPlan {
   startDate: string; // ISO date string
   endDate: string; // ISO date string
   createdAt: string; // ISO date string
-
 }
 
 // Constants
 const API_URL = 'http://localhost:8084/api/saving-plans';
-const { width } = Dimensions.get('window');
-const COLUMN_NUM = 2;
-const ITEM_WIDTH = (width - 48) / COLUMN_NUM; // 48 = padding on both sides + gap between items
+const HORIZONTAL_PADDING = 16;
+const ITEM_MARGIN = 8;
+const CARD_HEIGHT = 200; // Fixed card height as per original design
 
 // Color Palette
 const COLORS = {
@@ -69,6 +66,21 @@ const COLORS = {
 }
 
 export default function GroupSavingScreen() {
+  // Window dimensions
+  const { width } = useWindowDimensions();
+  
+  // Responsive column calculation
+  const getColumnCount = (screenWidth) => {
+    if (screenWidth >= 768) return 3; // Tablet or larger devices
+    if (screenWidth >= 480) return 2; // Larger phones
+    return 1; // Smaller phones
+  };
+  
+  const COLUMN_NUM = getColumnCount(width);
+  const CONTAINER_PADDING = HORIZONTAL_PADDING * 2;
+  const TOTAL_MARGIN = ITEM_MARGIN * (COLUMN_NUM - 1);
+  const ITEM_WIDTH = (width - CONTAINER_PADDING - TOTAL_MARGIN) / COLUMN_NUM;
+
   // Navigation
   const navigation = useNavigation<GroupSavingScreenNavigationProp>();
 
@@ -151,7 +163,7 @@ export default function GroupSavingScreen() {
   };
 
   // Component rendering
-  const renderPlanItem = ({ item }: { item: SavingPlan }) => {
+  const renderPlanItem = ({ item, index }: { item: SavingPlan; index: number }) => {
     const progressPercentage = getProgressPercentage(item);
     const isPlanCompleted = progressPercentage >= 100;
     const planTypeStyle = getPlanTypeStyles(item.planType);
@@ -162,9 +174,19 @@ export default function GroupSavingScreen() {
     const daysRemaining = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
     const isOverdue = daysRemaining < 0;
     
+    // Calculate margin based on column position
+    const marginRight = (index % COLUMN_NUM) !== (COLUMN_NUM - 1) ? ITEM_MARGIN : 0;
+    
     return (
       <TouchableOpacity 
-        style={[styles.planCard, { width: ITEM_WIDTH }]}
+        style={[
+          styles.planCard, 
+          { 
+            width: ITEM_WIDTH,
+            height: CARD_HEIGHT, // Use fixed height
+            marginRight: marginRight,
+          }
+        ]}
         onPress={() => handlePlanPress(item.planId)}
         activeOpacity={0.7}
       >
@@ -295,8 +317,10 @@ export default function GroupSavingScreen() {
                 <Text style={styles.welcomeText}>Hello, Saver!</Text>
                 <Text style={styles.title}>Saving Plans</Text>
               </View>
-              <TouchableOpacity style={styles.profileButton}
-              onPress={()=>navigation.navigate("Profile")}>
+              <TouchableOpacity 
+                style={styles.profileButton}
+                onPress={() => navigation.navigate("Profile")}
+              >
                 <Ionicons name="person-circle" size={40} color={COLORS.white} />
               </TouchableOpacity>
             </View>
@@ -343,7 +367,7 @@ export default function GroupSavingScreen() {
             keyExtractor={(item) => item.planId}
             renderItem={renderPlanItem}
             numColumns={COLUMN_NUM}
-            columnWrapperStyle={styles.columnWrapper}
+            key={`column-${COLUMN_NUM}`} // Force re-render when column count changes
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.listContent}
             ListEmptyComponent={
@@ -470,12 +494,14 @@ const styles = StyleSheet.create({
   filterButtonsContainer: {
     flexDirection: 'row',
     marginBottom: 16,
+    flexWrap: 'wrap',
   },
   filterButton: {
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 20,
     marginRight: 10,
+    marginBottom: 8,
     backgroundColor: COLORS.light,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -495,17 +521,12 @@ const styles = StyleSheet.create({
   
   // List
   listContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: HORIZONTAL_PADDING,
     paddingBottom: 100,
-  },
-  columnWrapper: {
-    justifyContent: 'space-between',
-    marginBottom: 16,
   },
   
   // Plan Card
   planCard: {
-    height: 200,
     borderRadius: 20,
     backgroundColor: COLORS.cardBg,
     shadowColor: COLORS.dark,
@@ -516,6 +537,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: COLORS.border,
+    marginBottom: 16,
   },
   cardGradient: {
     flex: 1,

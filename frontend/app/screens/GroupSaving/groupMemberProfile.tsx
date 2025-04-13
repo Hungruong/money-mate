@@ -1,12 +1,26 @@
-// screens/MemberProfileScreen.tsx
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, FlatList, ActivityIndicator } from 'react-native';
-import { RouteProp } from '@react-navigation/native';
+import { View, Text, StyleSheet, Image, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { LinearGradient } from 'expo-linear-gradient';
 
-const API_BASE_URL = 'http://localhost:8084/api';
-const USER_API_URL = 'http://localhost:8082/api/users';
-const CONTRIBUTION_API_URL = `${API_BASE_URL}/contributions`;
+// Types
+type RootStackParamList = {
+  MemberProfile: { userId: string; planId: string };
+};
+
+interface Contribution {
+  contributionId: string;
+  planId: string;
+  userId: string;
+  amount: number;
+  note?: string;
+  contributionDate: string;
+}
+
+type MemberProfileScreenRouteProp = RouteProp<RootStackParamList, 'MemberProfile'>;
+type MemberProfileScreenNavigationProp = StackNavigationProp<RootStackParamList, 'MemberProfile'>;
 
 interface Member {
   id: string;
@@ -16,56 +30,47 @@ interface Member {
   phoneNumber?: string;
   avatarUrl?: string;
   joinDate: string;
+}
+
+const API_BASE_URL = 'http://localhost:8084/api';
+const USER_API_URL = 'http://localhost:8082/api/users';
+
+// Theme colors
+const COLORS = {
+  primary: '#4A6FFF',
+  primaryDark: '#3652CC',
+  primaryLight: '#EAF0FF',
+  secondary: '#FF6B6B',
+  accent: '#5FDCAB',
+  accentDark: '#38B986',
+  background: '#F8FAFF',
+  card: '#FFFFFF',
+  text: '#2D3748',
+  textSecondary: '#6B7280',
+  textLight: '#94A3B8',
+  border: '#E2E8F0',
+  error: '#F56565',
 };
 
-interface Contribution {
-  id: string;
-  userId: string;
-  planId: string;
-  amount: number;
-  notes?: string;
-  createdAt: string;
-};
-
-type RootStackParamList = {
-  GroupHome: undefined;
-  MemberProfile: { userId: string; planId: string };
-};
-
-type MemberProfileScreenRouteProp = RouteProp<RootStackParamList, 'MemberProfile'>;
-type MemberProfileScreenNavigationProp = StackNavigationProp<RootStackParamList, 'MemberProfile'>;
-
-type Props = {
-  route: MemberProfileScreenRouteProp;
-  navigation: MemberProfileScreenNavigationProp;
-};
-
-const MemberProfileScreen: React.FC<Props> = ({ route }) => {
+const MemberProfileScreen = () => {
+  const route = useRoute<MemberProfileScreenRouteProp>();
+  const navigation = useNavigation<MemberProfileScreenNavigationProp>();
   const { userId, planId } = route.params;
+
   const [member, setMember] = useState<Member | null>(null);
   const [contributions, setContributions] = useState<Contribution[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [totalContributed, setTotalContributed] = useState<number>(0);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchMemberData = async () => {
+      setLoading(true);
       try {
-        setLoading(true);
-        setError(null);
-        
-        // Fetch member details
-        const memberResponse = await fetch(`${USER_API_URL}/${userId}`);
-        if (!memberResponse.ok) {
-          throw new Error('Failed to fetch member data');
-        }
-        
-        const memberData = await memberResponse.json();
-        
-        // Validate member data structure
-        if (!memberData.id || !memberData.firstName || !memberData.lastName || !memberData.email) {
-          throw new Error('Invalid member data structure');
-        }
-        
+        const memberRes = await fetch(`${USER_API_URL}/${userId}`);
+        if (!memberRes.ok) throw new Error('Failed to fetch member data');
+
+        const memberData = await memberRes.json();
         const validatedMember: Member = {
           id: memberData.id,
           firstName: memberData.firstName,
@@ -75,57 +80,53 @@ const MemberProfileScreen: React.FC<Props> = ({ route }) => {
           avatarUrl: memberData.avatarUrl || undefined,
           joinDate: memberData.joinDate
         };
-        
-        setMember(validatedMember);
 
-        // Fetch contributions
-        const contributionsResponse = await fetch(
-          `${CONTRIBUTION_API_URL}?userId=${userId}&planId=${planId}`
-        );
-        
-        if (!contributionsResponse.ok) {
-          throw new Error('Failed to fetch contributions');
-        }
-        
-        const contributionsData = await contributionsResponse.json();
-        
-        // Validate contributions data structure
-        if (!Array.isArray(contributionsData)) {
-          throw new Error('Invalid contributions data format');
-        }
-        
-        const validatedContributions = contributionsData.map(contribution => ({
-          id: contribution.id,
-          userId: contribution.userId,
-          planId: contribution.planId,
-          amount: Number(contribution.amount),
-          notes: contribution.notes || undefined,
-          createdAt: contribution.createdAt
-        })).filter(contribution => 
-          contribution.id && 
-          contribution.userId && 
-          contribution.planId && 
-          !isNaN(contribution.amount) && 
-          contribution.createdAt
-        );
-        
-        setContributions(validatedContributions);
-        
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        setError(error instanceof Error ? error.message : 'Unknown error occurred');
+        setMember(validatedMember);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Unknown error occurred');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    const fetchContributions = async () => {
+      try {
+        const contributionsRes = await fetch(`${API_BASE_URL}/contributions/plan/${planId}/user/${userId}`);
+        if (!contributionsRes.ok) throw new Error('Failed to fetch contributions');
+
+        const contributionsData = await contributionsRes.json();
+        setContributions(contributionsData);
+        
+        // Calculate total contributions
+        const total = contributionsData.reduce((sum: number, contribution: Contribution) => 
+          sum + contribution.amount, 0);
+        setTotalContributed(total);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Unknown error occurred while fetching contributions');
+      }
+    };
+
+    fetchMemberData();
+    fetchContributions();
   }, [userId, planId]);
+
+  const handleBackPress = () => {
+    navigation.goBack();
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2
+    }).format(amount);
+  };
 
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color={COLORS.primary} />
+        <Text style={styles.loadingText}>Loading member profile...</Text>
       </View>
     );
   }
@@ -133,7 +134,11 @@ const MemberProfileScreen: React.FC<Props> = ({ route }) => {
   if (error) {
     return (
       <View style={styles.errorContainer}>
+        <Icon name="error-outline" size={60} color={COLORS.error} />
         <Text style={styles.errorText}>{error}</Text>
+        <TouchableOpacity onPress={handleBackPress} style={styles.primaryButton}>
+          <Text style={styles.primaryButtonText}>Go Back</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -141,165 +146,503 @@ const MemberProfileScreen: React.FC<Props> = ({ route }) => {
   if (!member) {
     return (
       <View style={styles.errorContainer}>
+        <Icon name="person-off" size={60} color={COLORS.error} />
         <Text style={styles.errorText}>Member not found</Text>
+        <TouchableOpacity onPress={handleBackPress} style={styles.primaryButton}>
+          <Text style={styles.primaryButtonText}>Go Back</Text>
+        </TouchableOpacity>
       </View>
     );
   }
 
-  const renderContributionItem = ({ item }: { item: Contribution }) => (
-    <View style={styles.contributionItem}>
-      <View style={styles.contributionHeader}>
-        <Text style={styles.contributionAmount}>${item.amount.toFixed(2)}</Text>
-        <Text style={styles.contributionDate}>
-          {new Date(item.createdAt).toLocaleDateString()}
-        </Text>
-      </View>
-      {item.notes && <Text style={styles.contributionNotes}>{item.notes}</Text>}
-    </View>
-  );
-
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.profileHeader}>
-        {member.avatarUrl ? (
-          <Image source={{ uri: member.avatarUrl }} style={styles.avatar} />
-        ) : (
-          <View style={[styles.avatar, styles.placeholderAvatar]}>
-            <Text style={styles.placeholderText}>
-              {member.firstName.charAt(0)}{member.lastName.charAt(0)}
-            </Text>
+    <View style={styles.container}>
+      <LinearGradient
+        colors={[COLORS.primary, COLORS.primaryDark]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.header}
+      >
+        <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
+          <Icon name="arrow-back" size={24} color={COLORS.card} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Member Profile</Text>
+        <View style={styles.headerRightPlaceholder} />
+      </LinearGradient>
+
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent} 
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.profileCardContainer}>
+          <View style={styles.profileCard}>
+            <View style={styles.profileHeader}>
+              {member.avatarUrl ? (
+                <Image source={{ uri: member.avatarUrl }} style={styles.avatar} />
+              ) : (
+                <LinearGradient
+                  colors={[COLORS.secondary, COLORS.primaryDark]}
+                  style={[styles.avatar, styles.placeholderAvatar]}
+                >
+                  <Text style={styles.placeholderText}>
+                    {member.firstName.charAt(0)}{member.lastName.charAt(0)}
+                  </Text>
+                </LinearGradient>
+              )}
+              <View style={styles.profileInfo}>
+                <Text style={styles.name}>
+                  {member.firstName} {member.lastName}
+                </Text>
+                <View style={styles.badgeContainer}>
+                  <View style={styles.badge}>
+                    <Text style={styles.badgeText}>Active Member</Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.statsContainer}>
+              <View style={styles.statItem}>
+                <Text style={styles.statValue}>{formatCurrency(totalContributed)}</Text>
+                <Text style={styles.statLabel}>Total Contributed</Text>
+              </View>
+              <View style={styles.statDivider} />
+              <View style={styles.statItem}>
+                <Text style={styles.statValue}>{contributions.length}</Text>
+                <Text style={styles.statLabel}>Contributions</Text>
+              </View>
+            </View>
           </View>
-        )}
-        <Text style={styles.name}>
-          {member.firstName} {member.lastName}
-        </Text>
-        <Text style={styles.email}>{member.email}</Text>
-        {member.phoneNumber && (
-          <Text style={styles.phoneNumber}>{member.phoneNumber}</Text>
-        )}
-      </View>
+        </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Member Since</Text>
-        <Text style={styles.joinDate}>{new Date(member.joinDate).toLocaleDateString()}</Text>
-      </View>
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}>Contact Information</Text>
+          <View style={styles.detailsCard}>
+            <View style={styles.detailItem}>
+              <View style={styles.iconContainer}>
+                <Icon name="email" size={20} color={COLORS.primary} />
+              </View>
+              <View style={styles.detailContent}>
+                <Text style={styles.detailLabel}>Email Address</Text>
+                <Text style={styles.detailValue}>{member.email}</Text>
+              </View>
+            </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Contributions</Text>
-        {contributions.length > 0 ? (
-          <FlatList
-            data={contributions}
-            renderItem={renderContributionItem}
-            keyExtractor={(item) => item.id}
-            scrollEnabled={false}
-          />
-        ) : (
-          <Text style={styles.noContributions}>No contributions yet</Text>
-        )}
-      </View>
-    </ScrollView>
+            {member.phoneNumber && (
+              <View style={styles.detailItem}>
+                <View style={styles.iconContainer}>
+                  <Icon name="phone" size={20} color={COLORS.primary} />
+                </View>
+                <View style={styles.detailContent}>
+                  <Text style={styles.detailLabel}>Phone Number</Text>
+                  <Text style={styles.detailValue}>{member.phoneNumber}</Text>
+                </View>
+              </View>
+            )}
+
+            <View style={styles.detailItem}>
+              <View style={styles.iconContainer}>
+                <Icon name="event" size={20} color={COLORS.primary} />
+              </View>
+              <View style={styles.detailContent}>
+                <Text style={styles.detailLabel}>Member Since</Text>
+                <Text style={styles.detailValue}>
+                  {new Date(member.joinDate).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.sectionContainer}>
+          <View style={styles.sectionHeaderRow}>
+            <Text style={styles.sectionTitle}>Contribution History</Text>
+            <TouchableOpacity style={styles.sectionAction}>
+              <Text style={styles.sectionActionText}>View All</Text>
+              <Icon name="chevron-right" size={16} color={COLORS.primary} />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.contributionsCard}>
+            {contributions.length > 0 ? (
+              contributions.map((contribution, index) => (
+                <View 
+                  key={contribution.contributionId} 
+                  style={[
+                    styles.contributionItem,
+                    index === contributions.length - 1 && styles.lastContributionItem
+                  ]}
+                >
+                  <View style={styles.contributionHeader}>
+                    <View style={styles.contributionDate}>
+                      <Icon name="calendar-today" size={14} color={COLORS.textSecondary} style={styles.miniIcon} />
+                      <Text style={styles.contributionDateText}>
+                        {new Date(contribution.contributionDate).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        })}
+                      </Text>
+                    </View>
+                    <Text style={styles.contributionAmount}>
+                      {formatCurrency(contribution.amount)}
+                    </Text>
+                  </View>
+                  
+                  {contribution.note && (
+                    <View style={styles.contributionNote}>
+                      <Icon name="comment" size={14} color={COLORS.textSecondary} style={styles.miniIcon} />
+                      <Text style={styles.contributionNoteText}>{contribution.note}</Text>
+                    </View>
+                  )}
+                </View>
+              ))
+            ) : (
+              <View style={styles.emptyStateContainer}>
+                <Icon name="hourglass-empty" size={40} color={COLORS.textLight} />
+                <Text style={styles.emptyStateText}>No contributions yet</Text>
+              </View>
+            )}
+          </View>
+        </View>
+
+        <View style={styles.actionsContainer}>
+          <TouchableOpacity style={styles.primaryButton}>
+            <Icon name="message" size={18} color={COLORS.card} style={styles.buttonIcon} />
+            <Text style={styles.primaryButtonText}>Message</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.secondaryButton}>
+            <Icon name="edit" size={18} color={COLORS.primary} style={styles.buttonIcon} />
+            <Text style={styles.secondaryButtonText}>Edit Profile</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.background,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 50,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+    elevation: 4,
+    shadowColor: COLORS.primaryDark,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: COLORS.card,
+  },
+  backButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  headerRightPlaceholder: {
+    width: 40,
+  },
+  scrollContent: {
+    paddingBottom: 32,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: COLORS.background,
+  },
+  loadingText: {
+    marginTop: 12,
+    color: COLORS.textSecondary,
+    fontSize: 16,
   },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: 24,
+    backgroundColor: COLORS.background,
   },
   errorText: {
-    color: 'red',
+    color: COLORS.error,
     fontSize: 16,
+    marginVertical: 16,
+    textAlign: 'center',
+  },
+  profileCardContainer: {
+    marginTop: -20,
+    paddingHorizontal: 16,
+  },
+  profileCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 16,
+    padding: 20,
+    elevation: 4,
+    shadowColor: 'rgba(0, 0, 0, 0.1)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
   },
   profileHeader: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 24,
   },
   avatar: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    marginBottom: 16,
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    marginRight: 16,
+    borderWidth: 3,
+    borderColor: COLORS.card,
   },
   placeholderAvatar: {
-    backgroundColor: '#e1e1e1',
     justifyContent: 'center',
     alignItems: 'center',
   },
   placeholderText: {
-    fontSize: 48,
-    color: '#666',
+    fontSize: 32,
+    color: COLORS.card,
     fontWeight: 'bold',
+  },
+  profileInfo: {
+    flex: 1,
   },
   name: {
     fontSize: 24,
     fontWeight: 'bold',
+    color: COLORS.text,
+    marginBottom: 6,
+  },
+  badgeContainer: {
+    flexDirection: 'row',
+    marginTop: 4,
+  },
+  badge: {
+    backgroundColor: COLORS.primaryLight,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  badgeText: {
+    color: COLORS.primary,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    marginTop: 20,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+  },
+  statItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  statValue: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: COLORS.text,
     marginBottom: 4,
-    textAlign: 'center',
   },
-  email: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 4,
+  statLabel: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
   },
-  phoneNumber: {
-    fontSize: 16,
-    color: '#666',
+  statDivider: {
+    width: 1,
+    backgroundColor: COLORS.border,
+    marginHorizontal: 10,
   },
-  section: {
-    marginBottom: 20,
+  sectionContainer: {
+    marginTop: 24,
+    paddingHorizontal: 16,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    color: '#333',
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: 12,
   },
-  joinDate: {
+  sectionAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  sectionActionText: {
+    fontSize: 14,
+    color: COLORS.primary,
+    fontWeight: '600',
+    marginRight: 4,
+  },
+  detailsCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 16,
+    padding: 4,
+    elevation: 2,
+    shadowColor: 'rgba(0, 0, 0, 0.1)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  detailItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  iconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.primaryLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 14,
+  },
+  detailContent: {
+    flex: 1,
+  },
+  detailLabel: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    marginBottom: 2,
+  },
+  detailValue: {
     fontSize: 16,
-    color: '#666',
+    color: COLORS.text,
+  },
+  contributionsCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 16,
+    overflow: 'hidden',
+    elevation: 2,
+    shadowColor: 'rgba(0, 0, 0, 0.1)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   contributionItem: {
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#e1e1e1',
-    marginBottom: 8,
+    borderBottomColor: COLORS.border,
+  },
+  lastContributionItem: {
+    borderBottomWidth: 0,
   },
   contributionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  contributionDate: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  contributionDateText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
   },
   contributionAmount: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#2ecc71',
+    fontWeight: '700',
+    color: COLORS.primary,
   },
-  contributionDate: {
-    fontSize: 14,
-    color: '#666',
+  contributionNote: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
   },
-  contributionNotes: {
+  contributionNoteText: {
+    flex: 1,
     fontSize: 14,
-    color: '#444',
-    fontStyle: 'italic',
+    color: COLORS.text,
+    lineHeight: 20,
   },
-  noContributions: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
-    padding: 16,
+  miniIcon: {
+    marginRight: 6,
+  },
+  emptyStateContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 40,
+  },
+  emptyStateText: {
+    marginTop: 12,
+    color: COLORS.textSecondary,
+    fontSize: 16,
+  },
+  actionsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 24,
+    paddingHorizontal: 16,
+  },
+  primaryButton: {
+    flex: 1,
+    backgroundColor: COLORS.primary,
+    borderRadius: 10,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 12,
+    marginRight: 8,
+    elevation: 2,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  secondaryButton: {
+    flex: 1,
+    backgroundColor: COLORS.card,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 12,
+    marginLeft: 8,
+  },
+  buttonIcon: {
+    marginRight: 8,
+  },
+  primaryButtonText: {
+    color: COLORS.card,
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  secondaryButtonText: {
+    color: COLORS.primary,
+    fontWeight: '600',
+    fontSize: 16,
   },
 });
 

@@ -51,6 +51,7 @@ interface GroupData {
   startDate: string;
   endDate: string;
   createdAt: string;
+  planType: string; // Added type field to check if it's INDIVIDUAL or GROUP
 }
 
 interface ProgressBarProps {
@@ -88,6 +89,7 @@ export default function GroupHome() {
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [memberActionModalVisible, setMemberActionModalVisible] = useState(false);
   const [contributions, setContributions] = useState<Contribution[]>([]);
+
   /**
    * Fetches group data and member information
    */
@@ -231,8 +233,6 @@ export default function GroupHome() {
     }
   };
 
-
-
   /**
    * Handles removing a member from the group
    */
@@ -309,7 +309,6 @@ export default function GroupHome() {
     });
   };
 
-
   /**
    * Returns gradient colors based on progress value
    */
@@ -369,6 +368,10 @@ export default function GroupHome() {
     );
   }
 
+  // Check if the plan is an individual or group type
+  const isIndividualPlan = groupData.planType === 'Individual';
+  console.log(groupData);
+  console.log('Is Individual Plan:',groupData.planType, isIndividualPlan);
   // Calculate progress and days left
   const progressPercentage = (groupData.currentAmount / groupData.targetAmount) * 100;
   const progressColors = getProgressColor(progressPercentage / 100);
@@ -398,16 +401,7 @@ export default function GroupHome() {
             </View>
           </View>
 
-          <View style={styles.progressBarContainer}>
-            <LinearGradient
-              colors={progressColors}
-              start={{x: 0, y: 0}}
-              end={{x: 1, y: 0}}
-              style={[styles.progressFill, {
-                width: `${Math.min(100, progressPercentage)}%`
-              }]}
-            />
-          </View>
+         
           
           <View style={styles.progressDetails}>
             <Text style={styles.progressPercentage}>{Math.round(progressPercentage)}% Complete</Text>
@@ -476,7 +470,6 @@ export default function GroupHome() {
         <TouchableOpacity 
           style={styles.quickActionButton}
           onPress={() => navigation.navigate('Contribute', { planId, refreshContributions: fetchGroupData })}
-      
         >
           <View style={[styles.actionIcon, {backgroundColor: '#2ecc71'}]}>
             <Icon name="attach-money" size={20} color="white" />
@@ -485,35 +478,38 @@ export default function GroupHome() {
         </TouchableOpacity>
       </View>
 
-      {/* Members List */}
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>
-            Group Members ({groupData.members.length})
-          </Text>
-          <TouchableOpacity 
-            style={styles.addMemberButton}
-            onPress={() => setInviteModalVisible(true)}
-            disabled={isProcessing}
-          >
-            <Icon name="person-add" size={16} color="white" />
-            <Text style={styles.addMemberText}>Add Member</Text>
-          </TouchableOpacity>
+      {/* Members List - Only shown for GROUP plans */}
+      {!isIndividualPlan && (
+
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>
+              Group Members ({groupData.members.length})
+            </Text>
+            <TouchableOpacity 
+              style={styles.addMemberButton}
+              onPress={() => setInviteModalVisible(true)}
+              disabled={isProcessing}
+            >
+              <Icon name="person-add" size={16} color="white" />
+              <Text style={styles.addMemberText}>Add Member</Text>
+            </TouchableOpacity>
+          </View>
+          
+          <FlatList
+            data={groupData.members}
+            renderItem={renderMemberItem}
+            keyExtractor={item => item.id}
+            scrollEnabled={false}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Icon name="group" size={40} color="#ccc" />
+                <Text style={styles.emptyText}>No members yet. Invite some friends!</Text>
+              </View>
+            }
+          />
         </View>
-        
-        <FlatList
-          data={groupData.members}
-          renderItem={renderMemberItem}
-          keyExtractor={item => item.id}
-          scrollEnabled={false}
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Icon name="group" size={40} color="#ccc" />
-              <Text style={styles.emptyText}>No members yet. Invite some friends!</Text>
-            </View>
-          }
-        />
-      </View>
+      )}
 
       {/* Action Button */}
       <TouchableOpacity 
@@ -525,134 +521,141 @@ export default function GroupHome() {
         <Text style={styles.buttonText}>Delete Group</Text>
       </TouchableOpacity>
 
-      {/* Invite Member Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={isInviteModalVisible}
-        onRequestClose={() => !isProcessing && setInviteModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Invite New Member</Text>
+      {/* Invite Member Modal - Only relevant for GROUP plans */}
+      {!isIndividualPlan && (
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={isInviteModalVisible}
+          onRequestClose={() => !isProcessing && setInviteModalVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Invite New Member</Text>
+                <TouchableOpacity 
+                  onPress={() => !isProcessing && setInviteModalVisible(false)}
+                  disabled={isProcessing}
+                >
+                  <Icon name="close" size={24} color="#999" />
+                </TouchableOpacity>
+              </View>
+              
+              <View style={styles.modalBody}>
+                <Text style={styles.inputLabel}>Email Address</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter member's email"
+                  value={newMemberEmail}
+                  onChangeText={setNewMemberEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  editable={!isProcessing}
+                />
+              </View>
+              
               <TouchableOpacity 
-                onPress={() => !isProcessing && setInviteModalVisible(false)}
+                style={[styles.modalButton, isProcessing && styles.disabledButton]}
+                onPress={handleAddMember}
                 disabled={isProcessing}
               >
-                <Icon name="close" size={24} color="#999" />
+                {isProcessing ? (
+                  <ActivityIndicator color="white" />
+                ) : (
+                  <Text style={styles.modalButtonText}>Send Invitation</Text>
+                )}
               </TouchableOpacity>
             </View>
-            
-            <View style={styles.modalBody}>
-              <Text style={styles.inputLabel}>Email Address</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter member's email"
-                value={newMemberEmail}
-                onChangeText={setNewMemberEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                editable={!isProcessing}
-              />
-            </View>
-            
-            <TouchableOpacity 
-              style={[styles.modalButton, isProcessing && styles.disabledButton]}
-              onPress={handleAddMember}
-              disabled={isProcessing}
-            >
-              {isProcessing ? (
-                <ActivityIndicator color="white" />
-              ) : (
-                <Text style={styles.modalButtonText}>Send Invitation</Text>
-              )}
-            </TouchableOpacity>
           </View>
-        </View>
-      </Modal>
+        </Modal>
+      )}
 
-      {/* Member Actions Modal */}
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={memberActionModalVisible}
-        onRequestClose={() => !isProcessing && setMemberActionModalVisible(false)}
-      >
-        <TouchableOpacity 
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => !isProcessing && setMemberActionModalVisible(false)}
+      {/* Member Actions Modal - Only relevant for GROUP plans */}
+      {!isIndividualPlan && (
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={memberActionModalVisible}
+          onRequestClose={() => !isProcessing && setMemberActionModalVisible(false)}
         >
-          <View 
-            style={styles.actionSheet}
-            onStartShouldSetResponder={() => true}
-            onTouchEnd={(e) => e.stopPropagation()}
+          <TouchableOpacity 
+            style={styles.modalOverlay}
+            activeOpacity={1}
+            onPress={() => !isProcessing && setMemberActionModalVisible(false)}
           >
-            <View style={styles.actionSheetHandle} />
-            
-            {selectedMember && (
-              <>
-                <View style={styles.selectedMemberHeader}>
-                  <Image 
-                    style={styles.selectedMemberAvatar} 
-                    source={selectedMember.avatar ? { uri: selectedMember.avatar } : require("../../../assets/images/icon.png")} 
-                  />
-                  <View>
-                    <Text style={styles.selectedMemberName}>{selectedMember.name}</Text>
-                    <Text style={styles.selectedMemberEmail}>{selectedMember.email}</Text>
-                  </View>
-                </View>
-
-                <View style={styles.actionOptions}>
-                  {selectedMember.role === 'ADMIN' ? (
-                    <TouchableOpacity 
-                      style={styles.actionOption}
-                      onPress={() => handleChangeRole(selectedMember.userId, 'MEMBER')}
-                      disabled={isProcessing}
-                    >
-                      <Icon name="star-half" size={24} color="#f39c12" />
-                      <Text style={styles.actionOptionText}>Change to Member</Text>
-                    </TouchableOpacity>
-                  ) : (
-                    <>
-                      <TouchableOpacity 
-                        style={styles.actionOption}
-                        onPress={() => handleChangeRole(selectedMember.userId, 'ADMIN')}
-                        disabled={isProcessing}
-                      >
-                        <Icon name="star" size={24} color="#f39c12" />
-                        <Text style={styles.actionOptionText}>View Profile</Text>
-                      </TouchableOpacity>
-                      
-                      <TouchableOpacity 
-                        style={styles.actionOption}
-                        onPress={() => handleDeleteMember(selectedMember.userId)}
-                        disabled={isProcessing}
-                      >
-                        <Icon name="delete" size={24} color="#e74c3c" />
-                        <Text style={[styles.actionOptionText, {color: '#e74c3c'}]}>Remove from Group</Text>
-                      </TouchableOpacity>
-                    </>
-                  )}
-                </View>
-              </>
-            )}
-            
-            <TouchableOpacity 
-              style={styles.closeActionSheet}
-              onPress={() => !isProcessing && setMemberActionModalVisible(false)}
-              disabled={isProcessing}
+            <View 
+              style={styles.actionSheet}
+              onStartShouldSetResponder={() => true}
+              onTouchEnd={(e) => e.stopPropagation()}
             >
-              <Text style={styles.closeActionSheetText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      </Modal>
+              <View style={styles.actionSheetHandle} />
+              
+              {selectedMember && (
+                <>
+                  <View style={styles.selectedMemberHeader}>
+                    <Image 
+                      style={styles.selectedMemberAvatar} 
+                      source={selectedMember.avatar ? { uri: selectedMember.avatar } : require("../../../assets/images/icon.png")} 
+                    />
+                    <View>
+                      <Text style={styles.selectedMemberName}>{selectedMember.name}</Text>
+                      <Text style={styles.selectedMemberEmail}>{selectedMember.email}</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.actionOptions}>
+                    {selectedMember.role === 'ADMIN' ? (
+                      <TouchableOpacity 
+                        style={styles.actionOption}
+                        onPress={() => handleChangeRole(selectedMember.userId, 'MEMBER')}
+                        disabled={isProcessing}
+                      >
+                        <Icon name="star-half" size={24} color="#f39c12" />
+                        <Text style={styles.actionOptionText}>Change to Member</Text>
+                      </TouchableOpacity>
+                    ) : (
+                      <>
+                        <TouchableOpacity 
+                          style={styles.actionOption}
+                          onPress={() => navigation.navigate('MemberProfileScreen', { 
+                            userId: selectedMember.userId, 
+                            planId
+                          
+                          })}
+                          disabled={isProcessing}
+                        >
+                          <Icon name="user" size={24} color="#3498db" />
+                          <Text style={styles.actionOptionText}>View Profile</Text>
+                        </TouchableOpacity>
+                                        
+                        <TouchableOpacity 
+                          style={styles.actionOption}
+                          onPress={() => handleDeleteMember(selectedMember.userId)}
+                          disabled={isProcessing}
+                        >
+                          <Icon name="delete" size={24} color="#e74c3c" />
+                          <Text style={[styles.actionOptionText, {color: '#e74c3c'}]}>Remove from Group</Text>
+                        </TouchableOpacity>
+                      </>
+                    )}
+                  </View>
+                </>
+              )}
+              
+              <TouchableOpacity 
+                style={styles.closeActionSheet}
+                onPress={() => !isProcessing && setMemberActionModalVisible(false)}
+                disabled={isProcessing}
+              >
+                <Text style={styles.closeActionSheetText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </Modal>
+      )}
     </ScrollView>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

@@ -1,19 +1,17 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
   StyleSheet,
-  Modal,
-  Alert,
-  Platform,
   KeyboardAvoidingView,
   ScrollView,
   ActivityIndicator,
-  Image
+  Image,
+  Alert,
+  Platform,
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -23,8 +21,8 @@ interface SavingPlanFormData {
   userId: string;
   name: string;
   targetAmount: string;
-  startDate: Date;
-  endDate: Date;
+  startDate: string; // Change to string for manual input
+  endDate: string;   // Change to string for manual input
 }
 
 const API_URL = 'http://localhost:8084/api/saving-plans';
@@ -33,62 +31,44 @@ export default function SavingPlanCreate() {
   const navigation = useNavigation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showDatePicker, setShowDatePicker] = useState<'start' | 'end' | null>(null);
   const [planData, setPlanData] = useState<SavingPlanFormData>({
     planType: 'Individual',
-    userId: "122e4567-e89b-12d3-a456-426614174000", // You'll need to get this from your auth system
+    userId: "122e4567-e89b-12d3-a456-426614174000",
     name: '',
     targetAmount: '',
-    startDate: new Date(),
-    endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)) // Default 1 month from now
+    startDate: new Date().toISOString().split('T')[0], // Default to today's date
+    endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString().split('T')[0],
   });
   const [success, setSuccess] = useState(false);
 
-  // Handle input changes with type safety
-  const handleInputChange = (name: keyof SavingPlanFormData, value: string | 'Individual' | 'Group' | Date) => {
+  const handleInputChange = (name: keyof SavingPlanFormData, value: string) => {
     setPlanData(prev => ({
       ...prev,
       [name]: value
     }));
   };
 
-  // Validate plan data
   const validatePlanData = (data: SavingPlanFormData) => {
     const errors: string[] = [];
-
     if (!['Individual', 'Group'].includes(data.planType)) {
       errors.push('Plan type must be either Individual or Group');
     }
-  
     if (typeof data.name !== 'string' || data.name.trim() === '') {
       errors.push('Plan name is required');
     }
-
     const amount = parseFloat(data.targetAmount);
     if (isNaN(amount) || amount <= 0) {
       errors.push('Target amount must be a positive number');
     }
-
-    if (!(data.startDate instanceof Date) || isNaN(data.startDate.getTime())) {
-      errors.push('Invalid start date');
+    if (!data.startDate || !data.endDate) {
+      errors.push('Start and end dates are required');
     }
-
-    if (!(data.endDate instanceof Date) || isNaN(data.endDate.getTime())) {
-      errors.push('Invalid end date');
-    }
-
-    if (data.endDate <= data.startDate) {
+    if (new Date(data.endDate) <= new Date(data.startDate)) {
       errors.push('End date must be after start date');
     }
-
-    if (errors.length > 0) {
-      return errors;
-    }
-
-    return null;
+    return errors.length > 0 ? errors : null;
   };
 
-  // Handle plan creation
   const handleSubmit = async () => {
     const validationErrors = validatePlanData(planData);
     if (validationErrors) {
@@ -103,7 +83,7 @@ export default function SavingPlanCreate() {
       const payload = {
         ...planData,
         targetAmount: parseFloat(planData.targetAmount),
-        currentAmount: 0 // Default to 0 for new plans
+        currentAmount: 0
       };
 
       const response = await fetch(API_URL, {
@@ -119,40 +99,22 @@ export default function SavingPlanCreate() {
         throw new Error(`Error: ${response.status}`);
       }
 
-      // Show success message
       setSuccess(true);
-      
-      // Reset form after short delay
       setTimeout(() => {
         setPlanData({
-          planType: 'Individual',
-          userId: "122e4567-e89b-12d3-a456-426614174000",
+          ...planData,
           name: '',
           targetAmount: '',
-          startDate: new Date(),
-          endDate: new Date(new Date().setMonth(new Date().getMonth() + 1))
+          startDate: new Date().toISOString().split('T')[0],
+          endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString().split('T')[0],
         });
         setSuccess(false);
       }, 2000);
-      
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create saving plan');
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  // Handle date changes
-  const handleDateChange = (event: any, selectedDate?: Date) => {
-    setShowDatePicker(null);
-    if (selectedDate && showDatePicker) {
-      handleInputChange(showDatePicker === 'start' ? 'startDate' : 'endDate', selectedDate);
-    }
-  };
-
-  // Format date for display
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString();
   };
 
   return (
@@ -169,7 +131,7 @@ export default function SavingPlanCreate() {
           <Text style={styles.subHeader}>Set your financial goals and track your progress</Text>
         </View>
       </LinearGradient>
-      
+
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {error && (
           <View style={styles.errorContainer}>
@@ -223,11 +185,8 @@ export default function SavingPlanCreate() {
               ]}>Group</Text>
             </TouchableOpacity>
           </View>
-          
-          <Text style={styles.sectionTitle}>
-            <FontAwesome5 name="file-alt" size={18} color="#4c669f" style={styles.sectionIcon} />
-            Plan Details
-          </Text>
+
+          <Text style={styles.sectionTitle}>Plan Details</Text>
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Plan Name</Text>
             <View style={styles.inputWrapper}>
@@ -241,7 +200,7 @@ export default function SavingPlanCreate() {
               />
             </View>
           </View>
-          
+
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Target Amount ($)</Text>
             <View style={styles.inputWrapper}>
@@ -256,36 +215,29 @@ export default function SavingPlanCreate() {
               />
             </View>
           </View>
-          
-          <Text style={styles.sectionTitle}>
-            <FontAwesome5 name="calendar-alt" size={18} color="#4c669f" style={styles.sectionIcon} />
-            Timeline
-          </Text>
-          
+
+          <Text style={styles.sectionTitle}>Timeline</Text>
+
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Start Date</Text>
-            <TouchableOpacity
-              style={styles.dateInput}
-              onPress={() => setShowDatePicker('start')}
-            >
-              <FontAwesome5 name="calendar" size={18} color="#4c669f" style={styles.inputIcon} />
-              <Text style={styles.dateText}>{formatDate(planData.startDate)}</Text>
-              <FontAwesome5 name="chevron-down" size={16} color="#4c669f" />
-            </TouchableOpacity>
+            <TextInput
+              style={styles.input}
+              placeholder="YYYY-MM-DD"
+              value={planData.startDate}
+              onChangeText={(text) => handleInputChange('startDate', text)}
+            />
           </View>
-          
+
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Target End Date</Text>
-            <TouchableOpacity
-              style={styles.dateInput}
-              onPress={() => setShowDatePicker('end')}
-            >
-              <FontAwesome5 name="calendar-check" size={18} color="#4c669f" style={styles.inputIcon} />
-              <Text style={styles.dateText}>{formatDate(planData.endDate)}</Text>
-              <FontAwesome5 name="chevron-down" size={16} color="#4c669f" />
-            </TouchableOpacity>
+            <TextInput
+              style={styles.input}
+              placeholder="YYYY-MM-DD"
+              value={planData.endDate}
+              onChangeText={(text) => handleInputChange('endDate', text)}
+            />
           </View>
-          
+
           <View style={styles.infoContainer}>
             <FontAwesome5 name="info-circle" size={16} color="#4c669f" />
             <Text style={styles.infoText}>
@@ -293,17 +245,7 @@ export default function SavingPlanCreate() {
             </Text>
           </View>
         </View>
-        
-        {showDatePicker && (
-          <DateTimePicker
-            value={showDatePicker === 'start' ? planData.startDate : planData.endDate}
-            mode="date"
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-            onChange={handleDateChange}
-            minimumDate={showDatePicker === 'end' ? planData.startDate : undefined}
-          />
-        )}
-        
+
         <TouchableOpacity 
           onPress={handleSubmit}
           disabled={isSubmitting}
@@ -322,7 +264,7 @@ export default function SavingPlanCreate() {
             )}
           </LinearGradient>
         </TouchableOpacity>
-        
+
         <TouchableOpacity 
           style={styles.cancelButton}
           onPress={() => navigation.goBack()}
