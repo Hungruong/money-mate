@@ -5,12 +5,8 @@ import TradingScreen from "../screens/trading";
 import GroupSavingScreen from "../screens/GroupSaving";
 import BillSplitScreen from "../screens/BillSplit";
 import AppNavigator from "./UserProfileNavigator";
-<<<<<<< HEAD
-import GroupSavingNavigator from "./GroupSavingNavigator";
-=======
 import TradingNavigator from "./TradingNavigator";
 
->>>>>>> origin/master
 const Tab = createBottomTabNavigator();
 
 export default function BottomTabNavigator() {
