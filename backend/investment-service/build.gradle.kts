@@ -34,9 +34,13 @@ dependencies {
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	runtimeOnly("org.postgresql:postgresql")
 	annotationProcessor("org.projectlombok:lombok")
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("org.springframework.security:spring-security-test")
-	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+	// Test dependencies
+    testImplementation("org.springframework.boot:spring-boot-starter-test") // Core testing tools (JUnit 5, Mockito)
+    testImplementation("org.springframework.security:spring-security-test") // Security testing (optional for now)
+    testImplementation("com.h2database:h2") // In-memory DB for integration tests
+    testImplementation("org.mockito:mockito-junit-jupiter:5.11.0") // Explicit Mockito with JUnit 5 integration
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher") // Ensures JUnit 5 runs correctly
 }
 
 tasks.withType<Test> {
