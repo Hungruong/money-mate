@@ -2,37 +2,49 @@ package com.money.mate.auth_service.service;
 
 import com.money.mate.auth_service.entity.User;
 import com.money.mate.auth_service.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.util.Optional;
 
 @Service
 public class AuthService {
-    private final UserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
 
-    public AuthService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+    @Autowired
+    private UserRepository userRepository;
 
-    public String register(User user) {
-        Optional<User> existingUser = userRepository.findByEmail(user.getEmail());
-        if (existingUser.isPresent()) {
-            return "Email already exists!";
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    public User signUp(User user) {
+        userRepository.findByEmail(user.getEmail()).ifPresent(u -> {
+            throw new IllegalArgumentException("Email already in use.");
+        });
+
+        if (user.getPassword() != null && !user.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
 
-        // Check if Firebase UID is already registered
-        if (userRepository.findByFirebaseUid(user.getFirebaseUid()).isPresent()) {
-            return "Firebase UID already exists!";
-        }
-
-        user.setPassword(passwordEncoder.encode(user.getPassword())); // Hash password
-        userRepository.save(user);
-        return "User registered successfully!";
+        return userRepository.save(user);
     }
 
-    public Optional<User> getUserByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public User signIn(String email, String password) {
+        Optional<User> userOpt = userRepository.findByEmail(email);
+
+        if (userOpt.isEmpty()) {
+            throw new IllegalArgumentException("Invalid email or password.");
+        }
+
+        User user = userOpt.get();
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new IllegalArgumentException("Invalid email or password.");
+        }
+
+        return user;
+    }
+
+    public Optional<User> signInWithFirebase(String firebaseUid) {
+        return userRepository.findByFirebaseUid(firebaseUid);
     }
 }
