@@ -14,14 +14,15 @@ public class AuthService {
     @Autowired
     private UserRepository userRepository;
 
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     public User signUp(User user) {
-        userRepository.findByEmail(user.getEmail()).ifPresent(u -> {
-            throw new IllegalArgumentException("Email already in use.");
-        });
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Email is already in use.");
+        }
 
-        if (user.getPassword() != null && !user.getPassword().isBlank()) {
+        if (user.getPassword() != null) {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
 
@@ -29,22 +30,17 @@ public class AuthService {
     }
 
     public User signIn(String email, String password) {
-        Optional<User> userOpt = userRepository.findByEmail(email);
+        Optional<User> userOptional = userRepository.findByEmail(email);
 
-        if (userOpt.isEmpty()) {
+        if (userOptional.isEmpty()) {
             throw new IllegalArgumentException("Invalid email or password.");
         }
 
-        User user = userOpt.get();
-
-        if (!passwordEncoder.matches(password, user.getPassword())) {
+        User user = userOptional.get();
+        if (user.getPassword() == null || !passwordEncoder.matches(password, user.getPassword())) {
             throw new IllegalArgumentException("Invalid email or password.");
         }
 
         return user;
-    }
-
-    public Optional<User> signInWithFirebase(String firebaseUid) {
-        return userRepository.findByFirebaseUid(firebaseUid);
     }
 }

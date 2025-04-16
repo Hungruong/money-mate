@@ -1,28 +1,27 @@
-package com.money.mate.auth_service.Controller;
+package com.money.mate.auth_service.controller;
 
+import com.money.mate.auth_service.entity.User;
+import com.money.mate.auth_service.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.money.mate.auth_service.Model.MyAppUser;
-import com.money.mate.auth_service.Model.MyAppUserRepository;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-public class RegistrationController {
-    
+@RequestMapping("/api/auth")
+public class AuthController {
+
     @Autowired
-    private MyAppUserRepository myAppUserRepository;
-    
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    
-    @PostMapping(value = "/req/signup", consumes = "application/json")
-    public MyAppUser createUser(@RequestBody MyAppUser user){
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return myAppUserRepository.save(user);
+    private AuthService authService;
+
+    @PostMapping("/signup")
+    public ResponseEntity<User> signUp(@RequestBody User user) {
+        User createdUser = authService.signUp(user);
+        return ResponseEntity.ok(createdUser);
     }
-    
-    
+
+    @PostMapping("/signin")
+    public ResponseEntity<User> signIn(@RequestParam String email, @RequestParam String password) {
+        User authenticatedUser = authService.signIn(email, password);
+        return ResponseEntity.ok(authenticatedUser);
+    }
 }
