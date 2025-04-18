@@ -1,9 +1,9 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
-import {createAppContainer} from 'react-navigation'; 
 import { createStackNavigator } from "@react-navigation/stack";
 import AuthNavigator from "./navigation/AuthNavigator";
 import BottomTabNavigator from "./navigation/BottomTabNavigator";
+import GroupSavingNavigator from "./navigation/GroupSavingNavigator"; // Import the correct navigator
 
 const RootStack = createStackNavigator();
 
@@ -20,7 +20,9 @@ function RootNavigator() {
 export default function App() {
   return (
     <NavigationContainer>
-      <RootNavigator />
+      <RootStack.Navigator>
+        <RootStack.Screen name="Main" component={RootNavigator} options={{ headerShown: false }} />
+      </RootStack.Navigator>
     </NavigationContainer>
   );
 }

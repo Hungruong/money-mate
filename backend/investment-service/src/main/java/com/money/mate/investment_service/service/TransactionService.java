@@ -1,23 +1,20 @@
 package com.money.mate.investment_service.service;
 
-import com.money.mate.investment_service.entity.Transaction;
+import com.money.mate.investment_service.entity.Transactions;
 import com.money.mate.investment_service.repository.TransactionRepository;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 public class TransactionService {
-    private final TransactionRepository transactionRepository;
 
-    public List<Transaction> getInvestmentTransactions(UUID investmentId) {
-        return transactionRepository.findByInvestmentInvestmentId(investmentId);
-    }
+    @Autowired
+    private TransactionRepository transactionRepository;
 
-    public Transaction saveTransaction(Transaction transaction) {
-        return transactionRepository.save(transaction);
+    public List<Transactions> getTransactionsByUserId(UUID userId) {
+        return transactionRepository.findByUserId(userId);
     }
 }
