@@ -1,4 +1,4 @@
-package com.money.mate.auth_service.Controller;
+package com.money.mate.auth_service.controller;
 
 import com.money.mate.auth_service.dto.*;
 import com.money.mate.auth_service.entity.User;
