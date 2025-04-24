@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Image, ImageBackg
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from "@expo/vector-icons";
 
+import { useUser } from '../../Auth/UserContext';
 interface ProfileScreenProps {
   navigation: StackNavigationProp<RootStackParamList, 'Profile'>;
   userData?: {
@@ -28,6 +29,7 @@ type RootStackParamList = {
 const API_URL = "http://localhost:8082/api/users"; // Updated API URL
 
 const ProfileScreen = ({ navigation }: ProfileScreenProps) => {
+  const { userId } = useUser(); // Access userId from UserContext
   const [userData, setUserData] = useState<{
     avatarUrl: string;
     userName: string;
@@ -47,7 +49,11 @@ const ProfileScreen = ({ navigation }: ProfileScreenProps) => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const userId = "ef3f965a-edb6-49ae-8247-b8aaf1b1d434"; // mock userID to render profile
+
+        //const userId = 'ef3f965a-edb6-49ae-8247-b8aaf1b1d434';
+        
+        //console.log("@Profile User ID:", userId); // Log the userId to the console
+        //const userId = "ef3f965a-edb6-49ae-8247-b8aaf1b1d434"; // mock userID to render profile
         const response = await fetch(API_URL + "/" + userId);
         const data = await response.json();
         setUserData({
@@ -68,7 +74,7 @@ const ProfileScreen = ({ navigation }: ProfileScreenProps) => {
 
   const handleDeleteAccount = async () => {
     try {
-      const userID = 'ef3f965a-edb6-49ae-8247-b8aaf1b1d434'; // mock userID to delete
+      //const userID = 'ef3f965a-edb6-49ae-8247-b8aaf1b1d434'; // mock userID to delete
       const response = await fetch(`${API_URL}/delete`, {
         method: 'DELETE',
         headers: {

@@ -51,7 +51,7 @@ public class AuthController {
             User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
             String token = jwtUtils.generateJwtToken(authentication);
 
-            return ResponseEntity.ok(new JwtResponse(token, user.getUserName(), user.getEmail()));
+            return ResponseEntity.ok(new JwtResponse(token, user.getUserName(), user.getEmail(),user.getUserId()));
         } catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password.");
         }
