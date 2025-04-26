@@ -16,6 +16,7 @@ import org.springframework.http.HttpMethod;
 import java.util.Arrays;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
     @Bean
