@@ -7,7 +7,6 @@ import {
   ImageBackground, 
   StatusBar, 
   TouchableOpacity, 
-  Alert, 
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
@@ -42,11 +41,11 @@ export default function SignUpScreen() {
     const { firstName, lastName, userName, email, password } = formData;
     if (!firstName.trim() || !lastName.trim() || !userName.trim() || 
         !email.trim() || !password.trim()) {
-      Alert.alert("Missing Information", "Please fill in all fields");
+      window.alert("Missing Information: Please fill in all fields");
       return false;
     }
     if (password.length < 6) {
-      Alert.alert("Password Too Short", "Password must be at least 6 characters");
+      window.alert("Password Too Short: Password must be at least 6 characters");
       return false;
     }
     return true;
@@ -58,14 +57,11 @@ export default function SignUpScreen() {
     setIsLoading(true);
     try {
       const response = await axios.post(`${API_BASE_URL}/api/auth/signup`, formData);
-      Alert.alert(
-        "Success", 
-        "Account created successfully",
-        [{ text: "Sign In", onPress: () => navigation.navigate("SignIn") }]
-      );
+      window.alert("Account created successfully! Please sign in.");
+      navigation.navigate("SignIn");
     } catch (error: any) {
       const errorMessage = error.response?.data || "Failed to create account";
-      Alert.alert("Registration Failed", errorMessage);
+      window.alert(`Registration Failed: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
@@ -230,6 +226,9 @@ export default function SignUpScreen() {
     </SafeAreaView>
   );
 }
+
+// (Your styles remain unchanged, so I skipped copying them here)
+
 
 // Styles
 const styles = StyleSheet.create({

@@ -8,8 +8,7 @@ import {
   StyleSheet, 
   Linking, 
   StatusBar, 
-  TouchableOpacity, 
-  Alert,
+  TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
@@ -35,14 +34,13 @@ export default function SignInScreen({ setIsAuthenticated }: { setIsAuthenticate
   const { setUserId } = useUser();
 
   const handleSignIn = async () => {
-    // Validate inputs
     if (!email.trim()) {
-      Alert.alert("Email Required", "Please enter your email address");
+      window.alert("Email Required: Please enter your email address");
       return;
     }
     
     if (!password.trim()) {
-      Alert.alert("Password Required", "Please enter your password");
+      window.alert("Password Required: Please enter your password");
       return;
     }
 
@@ -53,29 +51,25 @@ export default function SignInScreen({ setIsAuthenticated }: { setIsAuthenticate
         password,
       });
 
-      // Handle successful login
       const { token, userName, userId } = response.data;
       setUserId(userId);
 
-      // Store the token & userId securely
       await AsyncStorage.setItem("authToken", token);
       await AsyncStorage.setItem("userId", userId);
 
-      // Set authentication state and navigate to the next screen
       setIsAuthenticated(true);
-      Alert.alert("Welcome Back", `Hello, ${userName}!`);
+      window.alert(`Welcome Back! Hello, ${userName}!`);
     } catch (error: any) {
-      // Handle login failure
       if (error.response) {
         if (error.response.status === 401) {
-          Alert.alert("Authentication Failed", "The email or password you entered is incorrect.");
+          window.alert("Authentication Failed: The email or password you entered is incorrect.");
         } else {
-          Alert.alert("Server Error", "We're having trouble connecting to our servers. Please try again later.");
+          window.alert("Server Error: We're having trouble connecting to our servers. Please try again later.");
         }
       } else if (error.request) {
-        Alert.alert("Connection Error", "Unable to reach our servers. Please check your internet connection.");
+        window.alert("Connection Error: Unable to reach our servers. Please check your internet connection.");
       } else {
-        Alert.alert("Sign In Error", "Something went wrong. Please try again.");
+        window.alert("Sign In Error: Something went wrong. Please try again.");
       }
     } finally {
       setIsLoading(false);
@@ -83,7 +77,6 @@ export default function SignInScreen({ setIsAuthenticated }: { setIsAuthenticate
   };
 
   const handleGoogleSignIn = () => {
-    // Implement Google Sign In logic
     console.log("Google Sign In pressed");
   };
 
@@ -204,6 +197,7 @@ export default function SignInScreen({ setIsAuthenticated }: { setIsAuthenticate
     </SafeAreaView>
   );
 }
+
 
 // Styles
 const styles = StyleSheet.create({
