@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "name": "money-mate",
   "version": "1.0.0",
   "description": "## Overview",
@@ -529,10 +528,4 @@
   "keywords": [],
   "author": "",
   "license": "ISC"
-=======
-  "dependencies": {
-    "react-native-linear-gradient": "^2.8.3",
-    "react-native-svg": "^15.11.2"
-  }
->>>>>>> origin/master
 }
