@@ -1,4 +1,4 @@
-package com.money.mate.auth_service.security;
+package com.money.mate.auth_service.Security;
 
 import com.money.mate.auth_service.entity.User;
 import com.money.mate.auth_service.repository.UserRepository;
