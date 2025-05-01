@@ -1,4 +1,4 @@
-package com.money.mate.auth_service.security;
+package com.money.mate.auth_service.Security;
 
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
