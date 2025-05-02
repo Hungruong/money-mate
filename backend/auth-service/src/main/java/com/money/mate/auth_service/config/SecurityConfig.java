@@ -17,7 +17,7 @@ import org.springframework.http.HttpMethod;
 import java.util.Arrays;
 
 @Configuration
-@EnableWebSecurity
+
 public class SecurityConfig {
 
     @Bean
@@ -27,7 +27,7 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Enable CORS
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll() // Allow public access to /api/auth/**
-                .requestMatchers("/api/protected/**").hasRole("USER") // Restrict access to /api/protected/**
+                .requestMatchers("/api/protected/**").hasAuthority("USER") // Use hasAuthority if roles lack the ROLE_ prefix
                 .anyRequest().authenticated() // Require authentication for all other requests
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); // Stateless session management
