@@ -15,12 +15,15 @@ import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import axios from 'axios';
 import { GroupSavingStackParamList } from "@/app/navigation/GroupSavingNavigator";
+import { CardField, useConfirmPayment } from '@stripe/stripe-react-native';
+
 
 type GroupHomeScreenRouteProp = RouteProp<GroupSavingStackParamList, 'GroupHome'>;
 
 type ContributeStackParamList = {
   GroupHome: undefined;
-  Contribute: { refreshContributions: () => void };
+  Contribute: { planId: string };
+  Payment: { amount: string; planId: string }; 
 };
 
 type ContributeScreenNavigationProp = StackNavigationProp<
@@ -30,9 +33,9 @@ type ContributeScreenNavigationProp = StackNavigationProp<
 
 const COLORS = {
   primary: '#4f46e5',
-  primaryGradient: ['#4f46e5', '#6366f1'],
+  primaryGradient: ['#4f46e5', '#6366f1'] as [string, string],
   secondary: '#ec4899',
-  secondaryGradient: ['#ec4899', '#f472b6'],
+  secondaryGradient: ['#ec4899', '#f472b6'] as [string, string],
   success: '#10b981',
   danger: '#ef4444',
   warning: '#f59e0b',
@@ -54,7 +57,7 @@ const COLORS = {
 export default function Contribute() {
   const navigation = useNavigation<ContributeScreenNavigationProp>();
   const route = useRoute<GroupHomeScreenRouteProp>();
-  const { planId, refreshContributions } = route.params; // Getting planId from route parameters
+  const { planId } = route.params;
   const [amount, setAmount] = useState<string>('');
   const [note, setNote] = useState<string>('');
 
@@ -84,7 +87,7 @@ export default function Contribute() {
         },
       });
 
-      console.log('Contribution submitted:', response.data);
+      console.log('Contribution submitted, now navigate to the payment form:', response.data);
       alert(`Contribution of $${amount} submitted!`);
 
       
@@ -93,8 +96,7 @@ export default function Contribute() {
       setNote('');
 
       
-      refreshContributions();
-      navigation.goBack();
+      navigation.navigate('Payment', { amount, planId });
       
     } catch (error) {
       console.error('Error submitting contribution:', error);
@@ -179,7 +181,7 @@ export default function Contribute() {
               end={{ x: 1, y: 0 }}
               style={styles.gradientButton}
             >
-              <Text style={styles.buttonText}>Confirm</Text>
+              <Text style={styles.buttonText}>Go to</Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>

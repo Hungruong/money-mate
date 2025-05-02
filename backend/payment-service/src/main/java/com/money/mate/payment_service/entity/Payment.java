@@ -34,7 +34,7 @@ public class Payment {
     private String currency = "USD";
 
     @Column(nullable = false, length = 50)
-    private String type; // Deposit, Expense, Refund, etc.
+    private String type; // from which service
 
     @Column(columnDefinition = "TEXT")
     private String description;
