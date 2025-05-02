@@ -14,6 +14,7 @@ import {SetGoal} from '../screens/GroupSaving/groupModify';
 import Contribute from "../screens/GroupSaving/groupContribution";
 import ProfileScreen from "../screens/profile/Profile";
 import MemberProfileScreen from "../screens/GroupSaving/groupMemberProfile";
+import StripePaymentForm from "../screens/profile/Payment";
 export type GroupSavingStackParamList = {
   GroupSavingHome: undefined;
   PlanDetails:{planId:string};
@@ -28,6 +29,7 @@ export type GroupSavingStackParamList = {
   Contribute:{planId:string, refreshContribution?:()=>Promise<void>};
   Profile:undefined;
   MemberProfileScreen:{planId?: string,userId:string}
+  Payment: undefined; 
 };
 
 const GroupSavingStack = createStackNavigator<GroupSavingStackParamList>();
@@ -47,6 +49,7 @@ export default function GroupSavingNavigator() {
       <GroupSavingStack.Screen name="Contribute" component={Contribute} />
       <GroupSavingStack.Screen name="Profile" component={ProfileScreen} />
       <GroupSavingStack.Screen name="MemberProfileScreen" component={MemberProfileScreen} />
+      <GroupSavingStack.Screen name="Payment" component={StripePaymentForm} />
 
     </GroupSavingStack.Navigator>
   );
