@@ -1,10 +1,11 @@
-package com.money.mate.auth_service.Security;
+package com.money.mate.auth_service.security;
 
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Base64;
 import java.util.Date;
@@ -18,13 +19,17 @@ public class JwtUtils {
     @Value("${jwt.expirationMs}")
     private long jwtExpirationMs; // Load the expiration time from application.properties
 
+
     public String generateJwtToken(Authentication authentication) {
         UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
         return Jwts.builder()
                 .setSubject(userPrincipal.getUsername())
+                .claim("roles", userPrincipal.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .toList()) // Ensure roles are in the correct format
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
-                .signWith(SignatureAlgorithm.HS512, Base64.getDecoder().decode(secretKey)) // Decode the Base64 secret key
+                .signWith(SignatureAlgorithm.HS512, Base64.getDecoder().decode(secretKey))
                 .compact();
     }
 
@@ -49,4 +54,5 @@ public class JwtUtils {
             return false;
         }
     }
+
 }
