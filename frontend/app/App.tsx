@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import React, { useState } from "react";
+
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import AuthNavigator from "./navigation/AuthNavigator";
 import BottomTabNavigator from "./navigation/BottomTabNavigator";
 
-
-
+import { UserProvider } from "./screens/Auth/UserContext"; // Import the UserProvider
 const RootStack = createStackNavigator();
 
 function RootNavigator() {
@@ -20,8 +20,15 @@ function RootNavigator() {
 
 export default function App() {
   return (
+    <UserProvider>
+
     <NavigationContainer>
-      <RootNavigator />
+      <RootStack.Navigator>
+        <RootStack.Screen name="Main" component={RootNavigator} options={{ headerShown: false }} />
+      </RootStack.Navigator>
+
     </NavigationContainer>
+    </UserProvider>
   );
 }
+

@@ -1,0 +1,8 @@
+{
+  "android": {
+    "package": "com.anonymous.moneymate"
+  },
+  "ios": {
+    "bundleIdentifier": "com.anonymous.moneymate"
+  }
+}

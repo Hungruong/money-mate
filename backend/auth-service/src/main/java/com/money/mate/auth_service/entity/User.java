@@ -11,6 +11,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+
 @Table(name = "users")
 public class User {
 
@@ -67,6 +68,10 @@ public class User {
         if (firebaseUid != null && !firebaseUid.isBlank() && password != null && !password.isBlank()) {
             throw new IllegalArgumentException("Only one of firebaseUid or password should be provided.");
         }
+        if (firebaseUid == null || firebaseUid.isBlank()) {
+            firebaseUid = UUID.randomUUID().toString();
+        }
+    
         updatedAt = new Date();
     }
 }

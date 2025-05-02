@@ -11,7 +11,7 @@ type RootStackParamList = {
   ChangePassword: undefined;
   Auth: undefined;
   HomeScreen: undefined;
-  Payment: undefined; // Add the "Payments" key to the type
+  Payment: undefined; 
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
