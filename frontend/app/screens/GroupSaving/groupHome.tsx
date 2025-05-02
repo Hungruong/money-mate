@@ -469,7 +469,7 @@ export default function GroupHome() {
         
         <TouchableOpacity 
           style={styles.quickActionButton}
-          onPress={() => navigation.navigate('Contribute', { planId, refreshContributions: fetchGroupData })}
+          onPress={() => navigation.navigate('Contribute', { planId, refreshContribution: fetchGroupData })}
         >
           <View style={[styles.actionIcon, {backgroundColor: '#2ecc71'}]}>
             <Icon name="attach-money" size={20} color="white" />
