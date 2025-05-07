@@ -1,0 +1,152 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Receipt OCR Test</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+            .upload-container {
+                border: 2px dashed #ccc;
+                padding: 20px;
+                text-align: center;
+                margin: 20px 0;
+            }
+            #preview {
+                max-width: 100%;
+                margin-top: 20px;
+                display: none;
+            }
+            #result {
+                margin-top: 20px;
+                padding: 15px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                background-color: #f9f9f9;
+                white-space: pre-wrap;
+                font-family: monospace;
+                display: none;
+            }
+            .loading {
+                display: none;
+                margin: 20px 0;
+                text-align: center;
+                color: #666;
+            }
+            .loading:after {
+                content: "...";
+                animation: dots 1.5s steps(5, end) infinite;
+            }
+            @keyframes dots {
+                0%,
+                20% {
+                    content: ".";
+                }
+                40% {
+                    content: "..";
+                }
+                60% {
+                    content: "...";
+                }
+                80%,
+                100% {
+                    content: "";
+                }
+            }
+            .section {
+                margin-bottom: 20px;
+            }
+            h2 {
+                color: #333;
+                border-bottom: 1px solid #eee;
+                padding-bottom: 8px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Receipt OCR Test</h1>
+
+        <div class="section">
+            <h2>Upload Receipt</h2>
+            <div class="upload-container">
+                <input
+                    type="file"
+                    id="imageInput"
+                    accept="image/*"
+                    capture="environment"
+                />
+                <button onclick="uploadImage()">Process Receipt</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Preview</h2>
+            <img id="preview" alt="Receipt Preview" />
+        </div>
+
+        <div id="loading" class="loading">Processing receipt with OCR</div>
+
+        <div class="section">
+            <h2>OCR Results</h2>
+            <div id="result"></div>
+        </div>
+
+        <script>
+            const imageInput = document.getElementById("imageInput");
+            const preview = document.getElementById("preview");
+            const resultDiv = document.getElementById("result");
+            const loadingDiv = document.getElementById("loading");
+
+            // Show preview when image is selected
+            imageInput.addEventListener("change", function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        preview.src = e.target.result;
+                        preview.style.display = "block";
+                        resultDiv.style.display = "none";
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            async function uploadImage() {
+                const file = imageInput.files[0];
+                if (!file) {
+                    alert("Please select an image first");
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append("image", file);
+
+                try {
+                    loadingDiv.style.display = "block";
+                    resultDiv.style.display = "none";
+
+                    const response = await fetch("/api/images/upload", {
+                        method: "POST",
+                        body: formData,
+                    });
+
+                    if (!response.ok) {
+                        throw new Error("Upload failed");
+                    }
+
+                    const result = await response.text();
+                    resultDiv.textContent = result;
+                    resultDiv.style.display = "block";
+                } catch (error) {
+                    resultDiv.textContent = "Error: " + error.message;
+                    resultDiv.style.display = "block";
+                } finally {
+                    loadingDiv.style.display = "none";
+                }
+            }
+        </script>
+    </body>
+</html>

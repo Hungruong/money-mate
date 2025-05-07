@@ -1,11 +1,14 @@
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { StackNavigationProp } from '@react-navigation/stack';
+import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation } from "@react-navigation/native";
-import React from 'react';
+import React from "react";
 import { GroupSavingStackParamList } from "../../navigation/GroupSavingNavigator"; // Import GroupSavingStackParamList
 
 // Type navigation prop
-type GroupSavingScreenNavigationProp = StackNavigationProp<GroupSavingStackParamList, 'GroupSavingHome'>;
+type GroupSavingScreenNavigationProp = StackNavigationProp<
+  GroupSavingStackParamList,
+  "GroupSavingHome"
+>;
 export interface SavingPlan {
   planId: string;
   planType: string; // Individual or Group
@@ -17,6 +20,9 @@ export interface SavingPlan {
   endDate: string; // ISO date string
   createdAt: string; // ISO date string
 }
+
+const API_URL = "http://localhost:8084/api/saving-plans";
+
 export default function GroupSavingScreen() {
   const navigation = useNavigation<GroupSavingScreenNavigationProp>(); // Correct navigation
 
@@ -27,7 +33,10 @@ export default function GroupSavingScreen() {
       </View>
 
       <View style={{ flex: 1 }}>
-        <TouchableOpacity style={styles.box} onPress={() => navigation.navigate('GroupHome')}>
+        <TouchableOpacity
+          style={styles.box}
+          onPress={() => navigation.navigate("GroupHome")}
+        >
           <Text>Group 1</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.box}>
@@ -41,7 +50,7 @@ export default function GroupSavingScreen() {
       <View style={{ flex: 1 }}>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate('GroupCreate')} // ✅ Navigates to GroupCreate screen
+          onPress={() => navigation.navigate("GroupCreate")} // ✅ Navigates to GroupCreate screen
         >
           <Text>Create new group</Text>
         </TouchableOpacity>
@@ -65,15 +74,15 @@ const styles = StyleSheet.create({
   },
   box: {
     padding: 20,
-    backgroundColor: 'grey',
-    alignItems: 'center',
+    backgroundColor: "grey",
+    alignItems: "center",
     marginTop: 10,
   },
   button: {
     padding: 15,
     marginTop: 50,
-    alignItems: 'center',
-    backgroundColor: 'grey',
+    alignItems: "center",
+    backgroundColor: "grey",
     borderRadius: 20,
     marginLeft: 50,
     marginRight: 50,
